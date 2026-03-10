@@ -1,7 +1,6 @@
 import json
 import os
-from pathlib import Path
-import uuid
+from pathlib import Path 
 from datetime import datetime, timedelta
 
 def init_data_files():
@@ -21,15 +20,6 @@ def init_data_files():
                 "password": "admin@2020",  # In production, hash this
                 "user_status": "staff",
                 "id": "55f124a3-b12c-4289-90a3-8a592e411ac7",
-                "email_verified": True,
-                "verified_at": datetime.now().strftime("%d/%m/%YT%Hh:%Mm:%Ss")
-            },
-            {
-                "name": "Test User",
-                "email": "user@example.com",
-                "password": "user123",
-                "user_status": "user",
-                "id": "66f124a3-c12c-5289-91a3-9b693f522bd8",
                 "email_verified": True,
                 "verified_at": datetime.now().strftime("%d/%m/%YT%Hh:%Mm:%Ss")
             }
@@ -62,19 +52,6 @@ def init_data_files():
                 "verified": True,
                 "attempts": 0,
                 "user_status": "staff",
-                "verified_at": verified_at.strftime(date_format)
-            },
-            {
-                "id": "88f124a3-e12c-7289-b3b4-bd8157444df0",
-                "email": "user@example.com",
-                "name": "Test User",
-                "password": "user123",
-                "pin": "123456",
-                "created_at": now.strftime(date_format),
-                "expires_at": expires.strftime(date_format),
-                "verified": True,
-                "attempts": 0,
-                "user_status": "user",
                 "verified_at": verified_at.strftime(date_format)
             }
         ]
@@ -127,32 +104,6 @@ def init_data_files():
                 "title": "Daily Draw #1",
                 "description": "Win Rs. 100 with just Rs. 1",
                 "auto_complete": True
-            },
-            {
-                "id": "lucky_00002",
-                "user_pay": 10,
-                "time_interval": "week",
-                "winner_get": 1000,
-                "created_at": "09/03/2026T01h:01m:00s",
-                "closed_at": "16/03/2026T01h:01m:00s",
-                "status": "open",
-                "visible": True,
-                "title": "Weekly Draw #2",
-                "description": "Win Rs. 1000 with just Rs. 10",
-                "auto_complete": True
-            },
-            {
-                "id": "lucky_00003",
-                "user_pay": 100,
-                "time_interval": "month",
-                "winner_get": 10000,
-                "created_at": "09/03/2026T01h:01m:00s",
-                "closed_at": "08/04/2026T01h:01m:00s",
-                "status": "open",
-                "visible": True,
-                "title": "Monthly Draw #3",
-                "description": "Win Rs. 10000 with just Rs. 100",
-                "auto_complete": True
             }
         ]
         with open(lucky_draws_file, 'w') as f:
@@ -161,15 +112,7 @@ def init_data_files():
     else:
         print(f"✅ {lucky_draws_file} already exists")
     
-    print("\n🎉 All data files initialized successfully!")
-    print("📊 Data Files Status:")
-    print(f"   • users.json: {users_file.exists() and users_file.stat().st_size > 0}")
-    print(f"   • email_verifications.json: {email_verifications_file.exists() and email_verifications_file.stat().st_size > 0}")
-    print(f"   • lucky_draws.json: {lucky_draws_file.exists() and lucky_draws_file.stat().st_size > 0}")
-    print(f"   • user_draws.json: {user_draws_file.exists() and user_draws_file.stat().st_size > 0}")
-    print(f"   • payments.json: {payments_file.exists() and payments_file.stat().st_size > 0}")
-    print(f"   • password_resets.json: {password_resets_file.exists() and password_resets_file.stat().st_size > 0}")
-
+    print("\n🎉 All data files initialized successfully!") 
 # Run initialization when module is imported
 if __name__ == "__main__":
     init_data_files()
