@@ -106,13 +106,23 @@
                             <label class="form-label">Entry Fee (Rs)</label>
                             <input type="number" class="form-control" id="newUserPay" placeholder="e.g., 10" required>
                         </div>
+                        
                         <div class="col-md-3">
                             <label class="form-label">Time Interval</label>
                             <select class="form-select" id="newTimeInterval" required>
-                                <option value="day">Daily</option>
-                                <option value="week">Weekly</option>
-                                <option value="month">Monthly</option>
+                                <!-- ========== نیا اپڈیٹڈ ڈراپ ڈاؤن - تمام 9 آپشنز ========== -->
+                                <option value="1hour">1 Hour (Result in last 10 min)</option>
+                                <option value="12hours">12 Hours (Result in last 1 hour)</option>
+                                <option value="day">1 Day (Result in last 1 hour)</option>
+                                <option value="10days">10 Days (Result on last day)</option>
+                                <option value="15days">15 Days (Result on last day)</option>
+                                <option value="month">1 Month (Result on last day)</option>
+                                <option value="3months">3 Months (Result on last day)</option>
+                                <option value="6months">6 Months (Result on last day)</option>
+                                <option value="1year">1 Year (Result in last month)</option>
+                                <!-- =================================================== -->
                             </select>
+                            <small class="text-muted">Select draw duration</small>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Prize Amount (Rs)</label>
@@ -232,14 +242,17 @@
                                 <label class="form-label">Prize Amount (Rs)</label>
                                 <input type="number" class="form-control" id="editWinnerGet">
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Time Interval</label>
-                                <select class="form-select" id="editTimeInterval">
-                                    <option value="day">Daily</option>
-                                    <option value="week">Weekly</option>
-                                    <option value="month">Monthly</option>
-                                </select>
-                            </div>
+                            <select class="form-select" id="editTimeInterval">
+                                <option value="1hour">1 Hour</option>
+                                <option value="12hours">12 Hours</option>
+                                <option value="day">1 Day</option>
+                                <option value="10days">10 Days</option>
+                                <option value="15days">15 Days</option>
+                                <option value="month">1 Month</option>
+                                <option value="3months">3 Months</option>
+                                <option value="6months">6 Months</option>
+                                <option value="1year">1 Year</option>
+                            </select>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Status</label>
                                 <select class="form-select" id="editStatus">
