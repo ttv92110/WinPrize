@@ -6,7 +6,7 @@ from api.startup import startup_event
 from pathlib import Path
 import os
 
-from api.routes import auth_routes, draw_routes, admin_routes, payment_routes, password_routes, verification_routes 
+from api.routes import auth_routes, draw_routes, admin_routes, payment_routes, password_routes, verification_routes, notification_routes
 
 # For Vercel serverless function
 app = FastAPI(title="Win Prize Lucky Draw API") 
@@ -52,6 +52,8 @@ app.include_router(admin_routes.router)
 app.include_router(payment_routes.router)
 app.include_router(password_routes.router)
 app.include_router(verification_routes.router) 
+app.include_router(notification_routes.router)    
+
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
@@ -92,6 +94,12 @@ async def admin_page(request: Request):
     if templates:
         return templates.TemplateResponse("admin.html", {"request": request})
     return HTMLResponse(content="<h1>Admin page not found</h1>")
+
+@app.get("/notifications", response_class=HTMLResponse)
+async def notifications_page(request: Request):
+    if templates:
+        return templates.TemplateResponse("notifications.html", {"request": request})
+    return HTMLResponse(content="<h1>Notifications page not found</h1>")
 
 @app.get("/winner", response_class=HTMLResponse)
 async def winners_page(request: Request):

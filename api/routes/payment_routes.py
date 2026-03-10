@@ -156,6 +156,8 @@ async def update_payment_status(payment_id: str, update: PaymentUpdate):
         if not payment:
             raise HTTPException(status_code=404, detail="Payment not found")
         
+        old_status = payment.get("status")
+        
         # Update payment
         payment["status"] = update.status
         payment["updated_at"] = datetime.now().strftime("%d/%m/%YT%Hh:%Mm:%Ss")
@@ -163,6 +165,36 @@ async def update_payment_status(payment_id: str, update: PaymentUpdate):
             payment["notes"] = update.notes
         
         payments_db.update(payment_id, payment)
+        
+        # ========== نیا: صارف کو ادائیگی کی اپڈیٹ کا نوٹیفکیشن ==========
+        from api.services.notification_service import notification_service
+        
+        if update.status == "paid":
+            notification_service.create_notification(
+                user_email=payment["user_email"],
+                title="✅ Payment Approved!",
+                message=f"Your payment of Rs. {payment['amount']} for {payment['lucky_draw_title']} has been approved. You are now enrolled!",
+                notification_type="payment_update",
+                draw_id=payment["lucky_draw_id"],
+                draw_title=payment["lucky_draw_title"],
+                amount=payment["amount"],
+                action_url=f"/draws/{payment['lucky_draw_id']}",
+                action_text="View Draw"
+            )
+        elif update.status == "cancel":
+            reason = update.notes or "Invalid transaction"
+            notification_service.create_notification(
+                user_email=payment["user_email"],
+                title="❌ Payment Rejected",
+                message=f"Your payment of Rs. {payment['amount']} for {payment['lucky_draw_title']} was rejected. Reason: {reason}",
+                notification_type="payment_update",
+                draw_id=payment["lucky_draw_id"],
+                draw_title=payment["lucky_draw_title"],
+                amount=payment["amount"],
+                action_url="/payment-status",
+                action_text="View Details"
+            )
+        # ============================================================
         
         # If payment is paid, update enrollment status
         if update.status == "paid":

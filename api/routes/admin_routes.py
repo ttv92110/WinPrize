@@ -77,39 +77,27 @@ async def create_draw(request: Request):
         created_at = datetime.now()
         time_interval = draw_data.get("time_interval", "day")
         
-        # ========== نیا اپڈیٹڈ کوڈ ==========
-        # Calculate closed_at based on interval with appropriate result time
+        # Calculate closed_at based on interval
         if time_interval == "1hour":
             closed_at = created_at + timedelta(hours=1)
-            # Last 10 minutes will be result time (automatically handled)
         elif time_interval == "12hours":
             closed_at = created_at + timedelta(hours=12)
-            # Last 1 hour will be result time
         elif time_interval == "day":
             closed_at = created_at + timedelta(days=1)
-            # Last hour will be result time
         elif time_interval == "10days":
             closed_at = created_at + timedelta(days=10)
-            # Last day will be result day
         elif time_interval == "15days":
             closed_at = created_at + timedelta(days=15)
-            # Last day will be result day
         elif time_interval == "month":
             closed_at = created_at + timedelta(days=30)
-            # Last day will be result day
         elif time_interval == "3months":
             closed_at = created_at + timedelta(days=90)
-            # Last day will be result day
         elif time_interval == "6months":
             closed_at = created_at + timedelta(days=180)
-            # Last day will be result day
         elif time_interval == "1year":
             closed_at = created_at + timedelta(days=365)
-            # Last month will be result month
         else:
-            # Default to 1 day if unknown
             closed_at = created_at + timedelta(days=1)
-        # ====================================
         
         # Format dates
         date_format = "%d/%m/%YT%Hh:%Mm:%Ss"
@@ -127,7 +115,6 @@ async def create_draw(request: Request):
         
         # Add optional fields with defaults
         if "title" not in draw_data:
-            # Format title based on interval
             interval_display = {
                 "1hour": "1 Hour",
                 "12hours": "12 Hours",
@@ -146,6 +133,37 @@ async def create_draw(request: Request):
             draw_data["description"] = f"Win Rs. {draw_data['winner_get']} with just Rs. {draw_data['user_pay']}"
         
         lucky_db.insert(draw_data)
+        
+        # ========== نیا: تمام صارفین کو نوٹیفکیشن بھیجیں ==========
+        from api.services.notification_service import notification_service
+        
+        # Interval display for notification
+        interval_map = {
+            "1hour": "1 Hour",
+            "12hours": "12 Hours", 
+            "day": "Daily",
+            "10days": "10 Days",
+            "15days": "15 Days",
+            "month": "Monthly",
+            "3months": "3 Months",
+            "6months": "6 Months",
+            "1year": "1 Year"
+        }
+        interval_display = interval_map.get(time_interval, time_interval)
+        
+        notification_service.broadcast_to_all_users(
+            title="🎉 New Lucky Draw Added!",
+            message=f"New {interval_display} Draw: Win Rs. {draw_data['winner_get']} with just Rs. {draw_data['user_pay']}!",
+            notification_type="new_draw",
+            draw_id=draw_data["id"],
+            draw_title=draw_data["title"],
+            amount=draw_data["winner_get"],
+            action_url=f"/confirm?draw={draw_data['id']}",
+            action_text="Join Now",
+            exclude_admins=True  # Admin کو نوٹیفکیشن نہ بھیجیں
+        )
+        # ====================================================
+        
         return {"message": "Draw created successfully", "success": True, "draw": draw_data}
     except Exception as e:
         print(f"Error in create_draw: {str(e)}")

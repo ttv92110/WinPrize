@@ -23,6 +23,7 @@ class Config:
     PAYMENTS_FILE = DATA_DIR / "payments.json"  # New payments file
     PASSWORD_RESETS_FILE = DATA_DIR / "password_resets.json"  # New file
     EMAIL_VERIFICATIONS_FILE = DATA_DIR / "email_verifications.json"  # New file
+    NOTIFICATIONS_FILE = DATA_DIR / "notifications.json"   
     
     # App settings
     
