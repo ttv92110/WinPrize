@@ -118,6 +118,127 @@
       color: #dee2e6;
       margin-bottom: 20px;
     }
+
+   
+    @media screen and (max-width: 680px) {
+        .status-card {
+            padding: 20px !important;
+            margin-bottom: 20px !important;
+        }
+        
+        .status-icon {
+            width: 50px !important;
+            height: 50px !important;
+            font-size: 24px !important;
+            margin-bottom: 15px !important;
+        }
+        
+        .detail-row {
+            padding: 8px 0 !important;
+            font-size: 0.9rem !important;
+        }
+        
+        .detail-label {
+            font-size: 0.9rem !important;
+        }
+        
+        .detail-value {
+            font-size: 0.9rem !important;
+        }
+        
+        .rejection-reason {
+            padding: 15px !important;
+            margin-top: 15px !important;
+        }
+        
+        .rejection-reason h6 {
+            font-size: 1rem !important;
+        }
+        
+        .rejection-reason p {
+            font-size: 0.9rem !important;
+        }
+        
+        .filter-btn {
+            padding: 6px 12px !important;
+            font-size: 0.8rem !important;
+            margin: 3px !important;
+        }
+        
+        .empty-state {
+            padding: 40px 15px !important;
+        }
+        
+        .empty-state i {
+            font-size: 50px !important;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.3rem !important;
+        }
+        
+        .empty-state p {
+            font-size: 0.9rem !important;
+        }
+        
+        .badge {
+            font-size: 0.7rem !important;
+            padding: 4px 8px !important;
+        }
+    }
+
+    /* ٹیبلیٹ (681px سے 890px تک) */
+    @media screen and (min-width: 681px) and (max-width: 890px) {
+        .status-card {
+            padding: 25px !important;
+        }
+        
+        .status-icon {
+            width: 60px !important;
+            height: 60px !important;
+            font-size: 30px !important;
+        }
+        
+        .filter-btn {
+            padding: 7px 15px !important;
+            font-size: 0.9rem !important;
+        }
+        
+        .detail-row {
+            font-size: 0.95rem !important;
+        }
+    }
+
+    /* بہت چھوٹے موبائل (380px سے کم) */
+    @media screen and (max-width: 380px) {
+        .status-card {
+            padding: 15px !important;
+        }
+        
+        .detail-row {
+            flex-direction: column !important;
+            text-align: left !important;
+        }
+        
+        .detail-label {
+            display: block !important;
+            margin-bottom: 3px !important;
+        }
+        
+        .detail-value {
+            display: block !important;
+        }
+        
+        .filter-btn {
+            padding: 5px 8px !important;
+            font-size: 0.7rem !important;
+            margin: 2px !important;
+        }
+        
+        .rejection-reason {
+            padding: 12px !important;
+        }
+    }
   </style>
 </head>
 <body>

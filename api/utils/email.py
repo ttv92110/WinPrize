@@ -96,6 +96,112 @@ class EmailService:
                         text-align: center;
                         border-top: 1px solid #dee2e6;
                     }}
+                    
+                   
+                    @media screen and (max-width: 600px) {{
+                        .container {{
+                            max-width: 100% !important;
+                            margin: 0 10px !important;
+                        }}
+                        
+                        .header {{
+                            padding: 30px 20px !important;
+                        }}
+                        
+                        .header i {{
+                            font-size: 40px !important;
+                            margin-bottom: 10px !important;
+                        }}
+                        
+                        .header h1 {{
+                            font-size: 22px !important;
+                        }}
+                        
+                        .content {{
+                            padding: 30px 20px !important;
+                        }}
+                        
+                        .content p {{
+                            font-size: 14px !important;
+                            line-height: 1.5 !important;
+                        }}
+                        
+                        .pin-box {{
+                            padding: 20px !important;
+                            margin: 20px 0 !important;
+                        }}
+                        
+                        .pin {{
+                            font-size: 32px !important;
+                            letter-spacing: 8px !important;
+                        }}
+                        
+                        .info-box {{
+                            padding: 15px !important;
+                            margin: 20px 0 !important;
+                        }}
+                        
+                        .info-box p {{
+                            font-size: 13px !important;
+                            margin: 3px 0 !important;
+                        }}
+                        
+                        .info-box strong {{
+                            font-size: 14px !important;
+                        }}
+                        
+                        .timer {{
+                            font-size: 20px !important;
+                        }}
+                        
+                        .footer {{
+                            padding: 20px !important;
+                        }}
+                        
+                        .footer p {{
+                            font-size: 12px !important;
+                            margin: 3px 0 !important;
+                        }}
+                    }}
+
+                    @media screen and (max-width: 380px) {{
+                        .header {{
+                            padding: 25px 15px !important;
+                        }}
+                        
+                        .header i {{
+                            font-size: 35px !important;
+                        }}
+                        
+                        .header h1 {{
+                            font-size: 20px !important;
+                        }}
+                        
+                        .content {{
+                            padding: 20px 15px !important;
+                        }}
+                        
+                        .pin-box {{
+                            padding: 15px !important;
+                        }}
+                        
+                        .pin {{
+                            font-size: 24px !important;
+                            letter-spacing: 5px !important;
+                        }}
+                        
+                        .info-box {{
+                            padding: 12px !important;
+                        }}
+                        
+                        .info-box p {{
+                            font-size: 12px !important;
+                        }}
+                        
+                        .timer {{
+                            font-size: 18px !important;
+                        }}
+                    }}
                 </style>
             </head>
             <body>
@@ -269,6 +375,106 @@ class EmailService:
                         color: #667eea;
                         text-decoration: none;
                     }}
+                    
+              
+                    @media screen and (max-width: 600px) {{
+                        .container {{
+                            max-width: 100% !important;
+                            margin: 0 10px !important;
+                        }}
+                        
+                        .header {{
+                            padding: 30px 20px !important;
+                        }}
+                        
+                        .header i {{
+                            font-size: 40px !important;
+                            margin-bottom: 10px !important;
+                        }}
+                        
+                        .header h1 {{
+                            font-size: 22px !important;
+                        }}
+                        
+                        .content {{
+                            padding: 30px 20px !important;
+                        }}
+                        
+                        .content p {{
+                            font-size: 14px !important;
+                            line-height: 1.5 !important;
+                            margin-bottom: 15px !important;
+                        }}
+                        
+                        .button {{
+                            padding: 12px 30px !important;
+                            font-size: 14px !important;
+                            margin: 15px 0 !important;
+                        }}
+                        
+                        .info-box {{
+                            padding: 15px !important;
+                            margin: 20px 0 !important;
+                        }}
+                        
+                        .info-box p {{
+                            font-size: 13px !important;
+                            margin: 5px 0 !important;
+                        }}
+                        
+                        .info-box .warning {{
+                            font-size: 13px !important;
+                        }}
+                        
+                        .footer {{
+                            padding: 20px !important;
+                        }}
+                        
+                        .footer p {{
+                            font-size: 12px !important;
+                            margin: 3px 0 !important;
+                        }}
+                        
+                        .footer a {{
+                            font-size: 12px !important;
+                        }}
+                    }}
+
+                    @media screen and (max-width: 380px) {{
+                        .header {{
+                            padding: 25px 15px !important;
+                        }}
+                        
+                        .header i {{
+                            font-size: 35px !important;
+                        }}
+                        
+                        .header h1 {{
+                            font-size: 20px !important;
+                        }}
+                        
+                        .content {{
+                            padding: 20px 15px !important;
+                        }}
+                        
+                        .content p {{
+                            font-size: 13px !important;
+                            margin-bottom: 12px !important;
+                        }}
+                        
+                        .button {{
+                            padding: 10px 25px !important;
+                            font-size: 13px !important;
+                        }}
+                        
+                        .info-box {{
+                            padding: 12px !important;
+                        }}
+                        
+                        .info-box p {{
+                            font-size: 12px !important;
+                        }}
+                    }}
                 </style>
             </head>
             <body>
@@ -416,6 +622,71 @@ class EmailService:
                         padding: 30px;
                         text-align: center;
                         border-top: 1px solid #dee2e6;
+                    }}
+                    
+                                    
+                    @media screen and (max-width: 600px) {{
+                        .container {{
+                            max-width: 100% !important;
+                            margin: 0 10px !important;
+                        }}
+                        
+                        .header {{
+                            padding: 30px 20px !important;
+                        }}
+                        
+                        .header h1 {{
+                            font-size: 24px !important;
+                        }}
+                        
+                        .content {{
+                            padding: 30px 20px !important;
+                        }}
+                        
+                        .content p {{
+                            font-size: 14px !important;
+                            line-height: 1.5 !important;
+                            margin-bottom: 15px !important;
+                        }}
+                        
+                        .button {{
+                            padding: 12px 30px !important;
+                            font-size: 14px !important;
+                            margin: 15px 0 !important;
+                        }}
+                        
+                        .footer {{
+                            padding: 20px !important;
+                        }}
+                        
+                        .footer p {{
+                            font-size: 12px !important;
+                            margin: 3px 0 !important;
+                        }}
+                    }}
+
+                    @media screen and (max-width: 380px) {{
+                        .header {{
+                            padding: 25px 15px !important;
+                        }}
+                        
+                        .header h1 {{
+                            font-size: 22px !important;
+                        }}
+                        
+                        .content {{
+                            padding: 20px 15px !important;
+                        }}
+                        
+                        .content p {{
+                            font-size: 13px !important;
+                            margin-bottom: 12px !important;
+                        }}
+                        
+                        .button {{
+                            padding: 10px 25px !important;
+                            font-size: 13px !important;
+                        }}
                     }}
                 </style>
             </head>
