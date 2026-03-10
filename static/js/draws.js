@@ -51,12 +51,14 @@ async function loadDraws() {
                 // Get accurate time left
                 let timeLeft = "Loading...";
                 let timeStatus = "";
+                let resultMessage = "";  // ← نتیجہ کا میسج یہاں ڈیفائن کیا
 
                 try {
                     const timeRes = await fetch(`/draws/time-left/${draw.id}`);
                     const timeData = await timeRes.json();
                     timeLeft = timeData.time_left;
                     timeStatus = timeData.status || draw.status;
+                    resultMessage = timeData.result_message || "";  // ← API سے میسج لیا
                 } catch (error) {
                     console.error("Error fetching time left:", error);
                     timeLeft = "Unknown";
@@ -83,7 +85,7 @@ async function loadDraws() {
 
                 const participantsCount = participantCounts[draw.id] || 0;
 
-                // Check if user has joined this specific draw - FIXED: Define userJoined here
+                // Check if user has joined this specific draw
                 const userJoined = joinedDraws[draw.id];
 
                 let card = `<div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="${i * 100}">
@@ -110,7 +112,7 @@ async function loadDraws() {
                             </div>
                             
                             <div class="prize-section text-center my-4">
-                                <small class="text-muted">Prize Pool</small>
+                                <small class="text-muted">Winning Prize Pool</small>
                                 <div class="prize-amount">
                                     <span class="display-5 fw-bold text-success">Rs. ${draw.winner_get}</span>
                                 </div>
@@ -129,6 +131,17 @@ async function loadDraws() {
                                     </span>
                                 </div>
                             </div>`;
+
+                // ========== اہم حصہ: Result Message یہاں شامل کیا گیا ہے ==========
+                if (resultMessage) {
+                    card += `<div class="text-center mb-3">
+                        <small class="text-warning fw-bold">
+                            <i class="fas fa-hourglass-half me-1"></i>
+                            ${resultMessage}
+                        </small>
+                    </div>`;
+                }
+                // =================================================================
 
                 if (draw.status === 'completed') {
                     card += `<button onclick="viewResult('${draw.id}')" 

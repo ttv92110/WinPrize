@@ -157,12 +157,55 @@ async def get_time_left(draw_id: str):
         hours = diff.seconds // 3600
         minutes = (diff.seconds % 3600) // 60
         
+        # ========== نیا اپڈیٹڈ کوڈ ==========
+        # Get time interval for better display
+        time_interval = draw.get("time_interval", "")
+        
+        # Check if we're in the result window
+        result_window = False
+        result_message = ""
+        
+        if time_interval == "1hour" and minutes <= 10:
+            result_window = True
+            result_message = "Result in next 10 minutes!"
+        elif time_interval == "12hours" and hours <= 1:
+            result_window = True
+            result_message = "Result in next hour!"
+        elif time_interval == "day" and hours <= 1:
+            result_window = True
+            result_message = "Result in next hour!"
+        elif time_interval in ["10days", "15days", "month"] and days <= 1:
+            result_window = True
+            result_message = "Result tomorrow!"
+        elif time_interval in ["3months", "6months"] and days <= 1:
+            result_window = True
+            result_message = "Result tomorrow!"
+        elif time_interval == "1year" and days <= 30:
+            result_window = True
+            result_message = "Result next month!"
+        # ====================================
+        
         if days > 0:
-            return {"time_left": f"{days}d {hours}h", "detailed": f"{days} days, {hours} hours"}
+            return {
+                "time_left": f"{days}d {hours}h", 
+                "detailed": f"{days} days, {hours} hours",
+                "result_window": result_window,
+                "result_message": result_message
+            }
         elif hours > 0:
-            return {"time_left": f"{hours}h {minutes}m", "detailed": f"{hours} hours, {minutes} minutes"}
+            return {
+                "time_left": f"{hours}h {minutes}m", 
+                "detailed": f"{hours} hours, {minutes} minutes",
+                "result_window": result_window,
+                "result_message": result_message
+            }
         else:
-            return {"time_left": f"{minutes}m", "detailed": f"{minutes} minutes"}
+            return {
+                "time_left": f"{minutes}m", 
+                "detailed": f"{minutes} minutes",
+                "result_window": result_window,
+                "result_message": result_message
+            }
     except:
         return {"time_left": "Invalid date"}
 

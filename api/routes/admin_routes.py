@@ -77,15 +77,39 @@ async def create_draw(request: Request):
         created_at = datetime.now()
         time_interval = draw_data.get("time_interval", "day")
         
-        # Calculate closed_at based on interval
-        if time_interval == "day":
+        # ========== نیا اپڈیٹڈ کوڈ ==========
+        # Calculate closed_at based on interval with appropriate result time
+        if time_interval == "1hour":
+            closed_at = created_at + timedelta(hours=1)
+            # Last 10 minutes will be result time (automatically handled)
+        elif time_interval == "12hours":
+            closed_at = created_at + timedelta(hours=12)
+            # Last 1 hour will be result time
+        elif time_interval == "day":
             closed_at = created_at + timedelta(days=1)
-        elif time_interval == "week":
-            closed_at = created_at + timedelta(weeks=1)
+            # Last hour will be result time
+        elif time_interval == "10days":
+            closed_at = created_at + timedelta(days=10)
+            # Last day will be result day
+        elif time_interval == "15days":
+            closed_at = created_at + timedelta(days=15)
+            # Last day will be result day
         elif time_interval == "month":
             closed_at = created_at + timedelta(days=30)
+            # Last day will be result day
+        elif time_interval == "3months":
+            closed_at = created_at + timedelta(days=90)
+            # Last day will be result day
+        elif time_interval == "6months":
+            closed_at = created_at + timedelta(days=180)
+            # Last day will be result day
+        elif time_interval == "1year":
+            closed_at = created_at + timedelta(days=365)
+            # Last month will be result month
         else:
+            # Default to 1 day if unknown
             closed_at = created_at + timedelta(days=1)
+        # ====================================
         
         # Format dates
         date_format = "%d/%m/%YT%Hh:%Mm:%Ss"
@@ -103,7 +127,21 @@ async def create_draw(request: Request):
         
         # Add optional fields with defaults
         if "title" not in draw_data:
-            draw_data["title"] = f"{time_interval.capitalize()}ly Draw #{next_id}"
+            # Format title based on interval
+            interval_display = {
+                "1hour": "1 Hour",
+                "12hours": "12 Hours",
+                "day": "Daily",
+                "10days": "10 Days",
+                "15days": "15 Days",
+                "month": "Monthly",
+                "3months": "3 Months",
+                "6months": "6 Months",
+                "1year": "1 Year"
+            }.get(time_interval, time_interval.capitalize())
+            
+            draw_data["title"] = f"{interval_display} Draw #{next_id}"
+        
         if "description" not in draw_data:
             draw_data["description"] = f"Win Rs. {draw_data['winner_get']} with just Rs. {draw_data['user_pay']}"
         
