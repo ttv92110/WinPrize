@@ -12,6 +12,7 @@ function updateUserMenu() {
         let dropdownItems = `
             <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
             <li><a class="dropdown-item" href="/my-draws"><i class="fas fa-ticket-alt me-2"></i>My Draws</a></li>
+            <li><a class="dropdown-item" href="/notifications"><i class="fas fa-bell me-2"></i>Notifications</a></li>
             <li><a class="dropdown-item" href="/winner"><i class="fas fa-trophy me-2"></i>Winners</a></li>
         `;
 
@@ -44,6 +45,9 @@ function updateUserMenu() {
                 </ul>
             </div>
         `;
+
+        // Update notification badge after user menu
+        updateNotificationBadge();
     } else {
         userMenu.innerHTML = `
             <button class="btn btn-outline-light rounded-pill px-4 me-2" data-bs-toggle="modal" data-bs-target="#loginModal">
@@ -53,8 +57,43 @@ function updateUserMenu() {
                 <i class="fas fa-user-plus me-2"></i>Register
             </button>
         `;
+
+        // Hide notification bell when logged out
+        const notificationBell = document.getElementById('notificationBell');
+        if (notificationBell) notificationBell.style.display = 'none';
     }
 }
+
+// ========== نیا: Notification Bell Functions ==========
+async function updateNotificationBadge() {
+    const user = JSON.parse(localStorage.getItem("loggedUser"));
+    const notificationBell = document.getElementById('notificationBell');
+    const badge = document.getElementById('notificationBadge');
+
+    if (!user) {
+        if (notificationBell) notificationBell.style.display = 'none';
+        return;
+    }
+
+    try {
+        const res = await fetch(`/notifications/count/${user.email}`);
+        const data = await res.json();
+
+        if (notificationBell) notificationBell.style.display = 'inline-block';
+
+        if (data.unread_count > 0) {
+            badge.textContent = data.unread_count;
+            badge.style.display = 'inline';
+            badge.style.animation = 'pulse 1s infinite';
+        } else {
+            badge.style.display = 'none';
+            badge.style.animation = 'none';
+        }
+    } catch (error) {
+        console.error("Error updating notification badge:", error);
+    }
+}
+// ===================================================
 
 // Modify login function to store user_status
 async function login() {
@@ -124,7 +163,7 @@ async function login() {
     }
 }
 
-// Forgot password function (CORRECT ONE - keeps this one, removes the duplicate)
+// Forgot password function
 async function forgotPassword() {
     const email = document.getElementById("forgotEmail").value;
 
@@ -280,6 +319,14 @@ document.addEventListener('DOMContentLoaded', function () {
     updateUserMenu();
     updateAdminNavLink();
 
+    // Check for new notifications every 30 seconds
+    setInterval(() => {
+        const user = JSON.parse(localStorage.getItem("loggedUser"));
+        if (user) {
+            updateNotificationBadge();
+        }
+    }, 30000);
+
     // Handle join draw button clicks from draws.js
     window.joinDraw = function (drawId, payAmount) {
         const user = JSON.parse(localStorage.getItem("loggedUser"));
@@ -314,6 +361,11 @@ function logout() {
     localStorage.removeItem("loggedUser");
     updateUserMenu();
     updateAdminNavLink();
+
+    // Hide notification bell on logout
+    const notificationBell = document.getElementById('notificationBell');
+    if (notificationBell) notificationBell.style.display = 'none';
+
     showToast("Logged out successfully", "info");
 }
 
