@@ -38,14 +38,6 @@ if static_dir.exists():
 else:
     print(f"Static directory not found: {static_dir}")
 
-data_dir = BASE_DIR / "data"
-if data_dir.exists():
-    # In Vercel, the data files are served from the root /data path
-    app.mount("/data", StaticFiles(directory=str(data_dir), html=True), name="data")
-    print(f"data directory mounted: {data_dir}")
-else:
-    print(f"data directory not found: {data_dir}")
-
 templates_dir = BASE_DIR / "templates"
 if templates_dir.exists():
     templates = Jinja2Templates(directory=str(templates_dir))
@@ -112,8 +104,7 @@ async def winners_page(request: Request):
 async def health_check():
     return {
         "status": "healthy",
-        "static_dir_exists": static_dir.exists() if static_dir else False,
-        "data_dir_exists": data_dir.exists() if data_dir else False,
+        "static_dir_exists": static_dir.exists() if static_dir else False, 
         "templates_dir_exists": templates_dir.exists() if templates_dir else False
     }
  

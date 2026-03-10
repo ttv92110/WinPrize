@@ -313,75 +313,146 @@ Open browser and go to http://127.0.0.1:8000
 📁 Project Structure
 text
 WinPrize/
+
 ├── api/
+
 │   ├── __init__.py
+
 │   ├── main.py                 # FastAPI main application
+
 │   ├── config.py                # Configuration settings
+
 │   ├── startup.py               # Startup events
+
 │   ├── models/
+
 │   │   ├── __init__.py
+
 │   │   ├── draw.py              # Lucky draw models
+
 │   │   ├── enrollment.py        # Enrollment models
+
 │   │   ├── payment.py           # Payment models
+
 │   │   ├── user.py              # User models
+
 │   │   └── verification.py      # Email verification models
+
 │   ├── routes/
+
 │   │   ├── __init__.py
+
 │   │   ├── admin_routes.py      # Admin endpoints
+
 │   │   ├── auth_routes.py       # Authentication endpoints
+
 │   │   ├── draw_routes.py       # Draw endpoints
+
 │   │   ├── payment_routes.py    # Payment endpoints
+
 │   │   ├── password_routes.py   # Password reset endpoints
+
 │   │   └── verification_routes.py # Email verification endpoints
+
 │   ├── schemas/
+
 │   │   ├── __init__.py
+
 │   │   ├── draw_schema.py       # Draw Pydantic schemas
+
 │   │   ├── enrollment_schema.py # Enrollment schemas
+
 │   │   └── user_schema.py       # User schemas
+
 │   ├── services/
+
 │   │   ├── __init__.py
+
 │   │   ├── draw_engine.py       # Draw logic
+
 │   │   └── file_db.py           # JSON file database
+
 │   └── utils/
+
 │       ├── __init__.py
+
 │       ├── auth.py              # Authentication utilities
+
 │       └── email.py             # Email sending utilities
+
 ├── static/
+
 │   ├── css/
+
 │   │   └── style.css            # Main stylesheet
+
 │   └── js/
+
 │       ├── admin.js              # Admin panel JavaScript
+
 │       ├── admin-payments.js     # Admin payment management
+
 │       ├── app.js                # Main application JS
+
 │       ├── auth.js               # Authentication JS
+
 │       ├── draws.js              # Draws display JS
+
 │       ├── main.js               # Additional JS
+
 │       ├── payment.js            # Payment form JS
+
 │       └── winner.js             # Winners display JS
+
 ├── templates/
+
 │   ├── admin.html                # Admin panel
+
 │   ├── confirm.html              # Payment confirmation
+
 │   ├── index.html                # Home page
+
 │   ├── login.html                # Login page
+
 │   ├── payment-status.html       # Payment status page
+
 │   ├── register.html             # Registration page
+
 │   ├── reset_password.html       # Password reset page
+
 │   ├── reset_password_error.html # Reset error page
+
 │   ├── verify.html               # Email verification page
+
 │   └── winner.html               # Winners page
+
 ├── data/                         # JSON database files
+
 │   ├── users.json
+
 │   ├── lucky_draws.json
+
 │   ├── user_draws.json
+
 │   ├── payments.json
+
 │   ├── password_resets.json
+
 │   └── email_verifications.json
+
 ├── .env                          # Environment variables
+
 ├── .gitignore                    # Git ignore file
+
 ├── requirements.txt              # Python dependencies
+
 ├── runtime.txt                   # Python version for Vercel
+
 ├── vercel.json                   # Vercel configuration
+
 └── run.py                        # Local development server
+
+
 👥 User Roles
 Regular User 👤
 Register with email verification
