@@ -1,0 +1,15 @@
+[
+    {
+        "id": "55f124a3-b12c-4289-90a3-8a592e411ac7",
+        "email": "ttv92110@gmail.com",
+        "name": "Admin User",
+        "password": "admin@2020",
+        "pin": "600026",
+        "created_at": "10/03/2026T14h:36m:29s",
+        "expires_at": "10/03/2026T14h:56m:29s",
+        "verified": true,
+        "attempts": 0,
+        "user_status": "user",
+        "verified_at": "10/03/2026T14h:37m:10s"
+    }
+]

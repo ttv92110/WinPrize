@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y7LDCTR5GX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-Y7LDCTR5GX');
+  </script>
+    <meta charset="UTF-8" />
+    <title>WinPrize - Your Gateway to Lucky Draws</title> 
+    <meta name="author" content="Arshad Ali" /> 
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />   
+    <meta property="og:title" content="WinPrize" />
+    <meta property="og:site_name" content="WinPrize" />
+    <meta name="twitter:title" content="WinPrize" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <meta name="description" content="Visit and know about me win Big Prize , Earn Online Price or Money or Amount . Win Prize Win Prize WinPrice" />
+    <meta name="keywords" content="Visit and know about me win Big Prize , Earn Online Price or Money or Amount . Win Prize Win Prize WinPrice" />
+    <meta property="og:description" content="Visit and know about me win Big Prize , Earn Online Price or Money or Amount . Win Prize Win Prize WinPrice" />
+    <link rel="icon" type="image/x-icon" href="../static/images/favicon_icon.png" /> 
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-trophy text-warning me-2"></i>
+                <span class="brand-text">Win<span class="text-warning">Prize</span></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#draws">Draws</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">How It Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/winner">Winners</a>
+                    </li>
+                    
+                    <!-- Admin link will be added dynamically here via JavaScript -->
+                    <li class="nav-item" id="adminNavLink" style="display: none;">
+                        <a class="nav-link text-warning" href="/admin">
+                            <i class="fas fa-shield-alt me-1"></i>Admin
+                        </a>
+                    </li>
+                </ul> 
+               
+                <div class="d-flex" id="userMenu">
+                    <button id="loginBtn" class="btn btn-outline-light rounded-pill px-4 me-2" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </button>
+                    <button id="registerBtn" class="btn btn-warning rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#registerModal">
+                        <i class="fas fa-user-plus me-2"></i>Register
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-6" data-aos="fade-right" data-aos-duration="1000">
+                    <span class="badge bg-warning text-dark mb-3 px-3 py-2 rounded-pill">
+                        <i class="fas fa-gem me-2"></i>Official Lucky Draw Platform
+                    </span>
+                    <h1 class="display-3 fw-bold mb-4">
+                        Turn <span class="text-warning">1 Rupee</span> into<br>Thousands Today!
+                    </h1>
+                    <p class="lead mb-4 text-light opacity-75">
+                        Join Pakistan's most trusted lucky draw platform. Participate in daily, weekly, and monthly draws with prizes up to  Rs.10,000.
+                    </p>
+                    <div class="d-flex gap-3 mb-5">
+                        <a href="#draws" class="btn btn-warning btn-lg rounded-pill px-5 py-3 fw-bold">
+                            <i class="fas fa-play me-2"></i>View Active Draws
+                        </a>
+                        <a href="#how-it-works" class="btn btn-outline-light btn-lg rounded-pill px-5 py-3">
+                            <i class="fas fa-info-circle me-2"></i>Learn More
+                        </a>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="row g-4">
+                        <div class="col-4">
+                            <div class="stat-box">
+                                <h3 class="text-warning fw-bold mb-0">10K+</h3>
+                                <p class="text-light mb-0">Happy Winners</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-box">
+                                <h3 class="text-warning fw-bold mb-0"> Rs.50L+</h3>
+                                <p class="text-light mb-0">Prize Distributed</p>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-box">
+                                <h3 class="text-warning fw-bold mb-0">100+</h3>
+                                <p class="text-light mb-0">Active Draws</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left" data-aos-duration="1000">
+                    <div class="hero-image-container">
+                        <img src="https://img.freepik.com/free-vector/winner-concept-illustration_114360-3091.jpg" 
+                             alt="Winner" class="img-fluid floating-animation">
+                        <div class="floating-card card-1">
+                            <i class="fas fa-trophy text-warning"></i>
+                            <span>Win up to  Rs.10,000</span>
+                        </div>
+                        <div class="floating-card card-2">
+                            <i class="fas fa-clock text-info"></i>
+                            <span>Daily Draws</span>
+                        </div>
+                        <div class="floating-card card-3">
+                            <i class="fas fa-shield-alt text-success"></i>
+                            <span>100% Secure</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Wave Divider -->
+        <div class="wave-divider">
+            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Active Draws Section -->
+    <section id="draws" class="draws-section py-5">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="badge bg-primary bg-opacity-10 text-primary mb-3 px-4 py-2 rounded-pill">
+                    <i class="fas fa-bolt me-2"></i>Active Lucky Draws
+                </span>
+                <h2 class="display-5 fw-bold mb-3">Choose Your Lucky Draw</h2>
+                <p class="lead text-muted">Pick a draw that suits your budget and win big prizes</p>
+            </div>
+
+            <div class="row" id="drawContainer">
+                <!-- Draw cards will be loaded here dynamically -->
+            </div>
+
+            <!-- View All Button -->
+            <div class="text-center mt-5" data-aos="fade-up">
+                <button class="btn btn-outline-primary btn-lg rounded-pill px-5">
+                    <i class="fas fa-eye me-2"></i>View All Draws
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works-section py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="badge bg-success bg-opacity-10 text-success mb-3 px-4 py-2 rounded-pill">
+                    <i class="fas fa-magic me-2"></i>Simple Process
+                </span>
+                <h2 class="display-5 fw-bold mb-3">How It Works</h2>
+                <p class="lead text-muted">Three simple steps to your chance of winning</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="step-card text-center p-4">
+                        <div class="step-icon mb-4">
+                            <span class="step-number">1</span>
+                            <i class="fas fa-user-plus fa-3x text-primary"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Create Account</h4>
+                        <p class="text-muted">Sign up with your email and get ready to participate in exciting lucky draws</p>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="step-card text-center p-4">
+                        <div class="step-icon mb-4">
+                            <span class="step-number">2</span>
+                            <i class="fas fa-hand-pointer fa-3x text-success"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Choose a Draw</h4>
+                        <p class="text-muted">Select from daily, weekly, or monthly draws that match your preference</p>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="step-card text-center p-4">
+                        <div class="step-icon mb-4">
+                            <span class="step-number">3</span>
+                            <i class="fas fa-trophy fa-3x text-warning"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Win Prizes</h4>
+                        <p class="text-muted">Get a chance to win big amounts. Winners are selected randomly and fairly</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section py-5">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="badge bg-info bg-opacity-10 text-info mb-3 px-4 py-2 rounded-pill">
+                    <i class="fas fa-star me-2"></i>Why Choose Us
+                </span>
+                <h2 class="display-5 fw-bold mb-3">Amazing Features</h2>
+                <p class="lead text-muted">Everything you need for a fair and exciting lucky draw experience</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3" data-aos="flip-left" data-aos-delay="100">
+                    <div class="feature-card">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-shield-alt fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="fw-bold">100% Secure</h5>
+                        <p class="text-muted small">Your transactions and data are completely secure with us</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3" data-aos="flip-left" data-aos-delay="200">
+                    <div class="feature-card">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-random fa-3x text-success"></i>
+                        </div>
+                        <h5 class="fw-bold">Fair Selection</h5>
+                        <p class="text-muted small">Random winner selection using advanced algorithms</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3" data-aos="flip-left" data-aos-delay="300">
+                    <div class="feature-card">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-clock fa-3x text-warning"></i>
+                        </div>
+                        <h5 class="fw-bold">Multiple Draws</h5>
+                        <p class="text-muted small">Daily, weekly, and monthly draws to choose from</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3" data-aos="flip-left" data-aos-delay="400">
+                    <div class="feature-card">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-headset fa-3x text-info"></i>
+                        </div>
+                        <h5 class="fw-bold">24/7 Support</h5>
+                        <p class="text-muted small">Dedicated customer support for all your queries</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials-section py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <span class="badge bg-warning bg-opacity-10 text-warning mb-3 px-4 py-2 rounded-pill">
+                    <i class="fas fa-quote-right me-2"></i>Success Stories
+                </span>
+                <h2 class="display-5 fw-bold mb-3">What Our Winners Say</h2>
+                <p class="lead text-muted">Real stories from real winners</p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="testimonial-card">
+                        <div class="quote-icon">
+                            <i class="fas fa-quote-left"></i>
+                        </div>
+                        <p class="mb-4">I won  Pkr1000 in my first week! The process was so simple and transparent. Highly recommended!</p>
+                        <div class="d-flex align-items-center">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="rounded-circle me-3" width="50">
+                            <div>
+                                <h6 class="mb-0 fw-bold">Saeed Ahmed</h6>
+                                <small class="text-warning">Winner -  Pkr.1000</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="testimonial-card">
+                        <div class="quote-icon">
+                            <i class="fas fa-quote-left"></i>
+                        </div>
+                        <p class="mb-4">Amazing platform! Won Pkr.5000 in the monthly draw. The money was credited instantly.</p>
+                        <div class="d-flex align-items-center">
+                            <img src="https://randomuser.me/api/portraits/men/40.jpg" alt="User" class="rounded-circle me-3" width="50">
+                            <div>
+                                <h6 class="mb-0 fw-bold">Latif Khosa</h6>
+                                <small class="text-warning">Winner - Pkr.5000</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="testimonial-card">
+                        <div class="quote-icon">
+                            <i class="fas fa-quote-left"></i>
+                        </div>
+                        <p class="mb-4">Just Pkr.1 and I won Pkr.100! This platform is truly changing lives. Thank you WinPrize!</p>
+                        <div class="d-flex align-items-center">
+                            <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="User" class="rounded-circle me-3" width="50">
+                            <div>
+                                <h6 class="mb-0 fw-bold">Ali Raza</h6>
+                                <small class="text-warning">Winner -  Pkr.100</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8" data-aos="fade-right">
+                    <h2 class="display-6 fw-bold text-white mb-3">Ready to Try Your Luck?</h2>
+                    <p class="text-white-50 mb-0 lead">Join thousands of winners who have already won big prizes!</p>
+                </div>
+                <div class="col-lg-4 text-lg-end" data-aos="fade-left">
+                    <button id="registerBtn" class="btn btn-warning btn-lg rounded-pill px-5 py-3 fw-bold">
+                        <i class="fas fa-user-plus me-2"></i>Get Started Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer bg-dark text-white-50 py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <h5 class="text-white mb-3">
+                        <i class="fas fa-trophy text-warning me-2"></i>
+                        WinPrize
+                    </h5>
+                    <p class="small">Pakistan's most trusted lucky draw platform. Participate in exciting draws and win amazing prizes daily.</p>
+                    <div class="social-links">
+                        <a href="#" class="text-white-50 me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white-50 me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white-50 me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white-50"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <h6 class="text-white mb-3">Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="/" class="text-white-50 text-decoration-none">Home</a></li>
+                        <li class="mb-2"><a href="#draws" class="text-white-50 text-decoration-none">Draws</a></li>
+                        <li class="mb-2"><a href="#how-it-works" class="text-white-50 text-decoration-none">How It Works</a></li>
+                        <li class="mb-2"><a href="/winners" class="text-white-50 text-decoration-none">Winners</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="text-white mb-3">Support</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">FAQs</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Terms & Conditions</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Privacy Policy</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="text-white mb-3">Contact Info</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>Lahore, Pakistan</li>
+                        <li class="mb-2"><i class="fas fa-envelope me-2"></i>ttv92110@gmail.com</li>
+                        <li class="mb-2"><i class="fas fa-phone me-2"></i>+92 336 1167171</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4 bg-secondary">
+            <div class="text-center small">
+                &copy; 2026 WinPrize. All rights reserved.
+            </div>
+        </div>
+    </footer>
+    
+    
+    <!-- ==================== LOGIN MODAL ==================== -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-header border-0 bg-gradient-primary text-white">
+                    <h5 class="modal-title" id="loginModalLabel">
+                        <i class="fas fa-sign-in-alt me-2"></i>Welcome Back!
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Login Form -->
+                    <form id="loginForm" onsubmit="event.preventDefault(); login();">
+                        <div class="text-center mb-4">
+                            <div class="login-avatar">
+                                <i class="fas fa-user-circle fa-4x text-primary"></i>
+                            </div>
+                            <p class="text-muted">Login to your account</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="loginEmail" class="form-label">
+                                <i class="fas fa-envelope me-2 text-primary"></i>Email Address
+                            </label>
+                            <input type="email" class="form-control form-control-lg" id="loginEmail" 
+                                   placeholder="Enter your email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">
+                                <i class="fas fa-lock me-2 text-primary"></i>Password
+                            </label>
+                            <div class="input-group">
+                                <input type="password" class="form-control form-control-lg" id="loginPassword" 
+                                       placeholder="Enter your password" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('loginPassword')">
+                                    <i class="fas fa-eye" id="toggleLoginPassword"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">
+                                    Remember me
+                                </label>
+                            </div>
+                            <a href="#" class="text-primary text-decoration-none" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal" data-bs-dismiss="modal">
+                                Forgot Password?
+                            </a>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" id="loginSubmitBtn">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="loginSpinner"></span>
+                            <span id="loginBtnText">Login</span>
+                        </button>
+                        
+                        <div class="text-center">
+                            <p class="mb-0">Don't have an account? 
+                                <a href="#" class="text-warning text-decoration-none fw-bold" data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">
+                                    Register Here
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== REGISTER MODAL ==================== -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-header border-0 bg-gradient-warning">
+                    <h5 class="modal-title" id="registerModalLabel">
+                        <i class="fas fa-user-plus me-2"></i>Create Account
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Register Form -->
+                    <form id="registerForm" onsubmit="event.preventDefault(); signup();">
+                        <div class="text-center mb-4">
+                            <div class="register-avatar">
+                                <i class="fas fa-user-plus fa-4x text-warning"></i>
+                            </div>
+                            <p class="text-muted">Join WinPrize today</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="registerName" class="form-label">
+                                <i class="fas fa-user me-2 text-warning"></i>Full Name
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="registerName" 
+                                   placeholder="Enter your full name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="registerEmail" class="form-label">
+                                <i class="fas fa-envelope me-2 text-warning"></i>Email Address
+                            </label>
+                            <input type="email" class="form-control form-control-lg" id="registerEmail" 
+                                   placeholder="Enter your email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="registerPassword" class="form-label">
+                                <i class="fas fa-lock me-2 text-warning"></i>Password
+                            </label>
+                            <div class="input-group">
+                                <input type="password" class="form-control form-control-lg" id="registerPassword" 
+                                       placeholder="Create a password" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('registerPassword')">
+                                    <i class="fas fa-eye" id="toggleRegisterPassword"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength mt-2">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar" id="passwordStrength" role="progressbar" style="width: 0%;"></div>
+                                </div>
+                                <small class="text-muted" id="passwordStrengthText"></small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">
+                                <i class="fas fa-check-circle me-2 text-warning"></i>Confirm Password
+                            </label>
+                            <div class="input-group">
+                                <input type="password" class="form-control form-control-lg" id="confirmPassword" 
+                                       placeholder="Confirm your password" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmPassword')">
+                                    <i class="fas fa-eye" id="toggleConfirmPassword"></i>
+                                </button>
+                            </div>
+                            <small class="text-danger d-none" id="passwordMismatch">Passwords do not match!</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                                <label class="form-check-label" for="termsCheck">
+                                    I agree to the <a href="#" class="text-warning">Terms & Conditions</a> and 
+                                    <a href="#" class="text-warning">Privacy Policy</a>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-warning btn-lg w-100 mb-3" id="registerSubmitBtn">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="registerSpinner"></span>
+                            <span id="registerBtnText">Create Account</span>
+                        </button>
+                        
+                        <div class="text-center">
+                            <p class="mb-0">Already have an account? 
+                                <a href="#" class="text-primary text-decoration-none fw-bold" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">
+                                    Login Here
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FORGOT PASSWORD MODAL ==================== -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-header border-0 bg-gradient-info">
+                    <h5 class="modal-title" id="forgotPasswordModalLabel">
+                        <i class="fas fa-key me-2"></i>Reset Password
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-envelope-open-text fa-4x text-info mb-3"></i>
+                        <p class="text-muted">Enter your email to receive reset instructions</p>
+                    </div>
+                    
+                    <form id="forgotPasswordForm" onsubmit="event.preventDefault(); forgotPassword();">
+                        <div class="mb-4">
+                            <label for="forgotEmail" class="form-label">
+                                <i class="fas fa-envelope me-2 text-info"></i>Email Address
+                            </label>
+                            <input type="email" class="form-control form-control-lg" id="forgotEmail" 
+                                   placeholder="Enter your email" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-info btn-lg w-100 text-white">
+                            <i class="fas fa-paper-plane me-2"></i>Send Reset Link
+                        </button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SUCCESS TOAST ==================== -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span id="toastMessage"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../static/js/app.js"></script>
+    <script src="../static/js/draws.js"></script>
+    <script src="../static/js/auth.js"></script>
+    <script src="../static/js/main.js"></script>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>       
+    // Initialize AOS
+    AOS.init({
+        duration: 1000,
+        once: true
+    });
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('navbar-scrolled');
+        } else {
+            navbar.classList.remove('navbar-scrolled');
+        }
+    });
+    // Toggle password visibility
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(`toggle${inputId.charAt(0).toUpperCase() + inputId.slice(1)}`);
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+    // Password strength checker
+    document.getElementById('registerPassword')?.addEventListener('input', function(e) {
+        const password = e.target.value;
+        const strengthBar = document.getElementById('passwordStrength');
+        const strengthText = document.getElementById('passwordStrengthText');
+        
+        let strength = 0;
+        if (password.length >= 8) strength += 25;
+        if (password.match(/[a-z]+/)) strength += 25;
+        if (password.match(/[A-Z]+/)) strength += 25;
+        if (password.match(/[0-9]+/)) strength += 25;
+        
+        strengthBar.style.width = strength + '%';
+        
+        if (strength <= 25) {
+            strengthBar.className = 'progress-bar bg-danger';
+            strengthText.textContent = 'Weak password';
+        } else if (strength <= 50) {
+            strengthBar.className = 'progress-bar bg-warning';
+            strengthText.textContent = 'Fair password';
+        } else if (strength <= 75) {
+            strengthBar.className = 'progress-bar bg-info';
+            strengthText.textContent = 'Good password';
+        } else {
+            strengthBar.className = 'progress-bar bg-success';
+            strengthText.textContent = 'Strong password';
+        }
+    });
+    // Confirm password match
+    document.getElementById('confirmPassword')?.addEventListener('input', function(e) {
+        const password = document.getElementById('registerPassword').value;
+        const confirm = e.target.value;
+        const mismatch = document.getElementById('passwordMismatch');
+        
+        if (password !== confirm) {
+            mismatch.classList.remove('d-none');
+        } else {
+            mismatch.classList.add('d-none');
+        }
+    });
+    // Show toast function
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('successToast');
+        const toastMessage = document.getElementById('toastMessage');
+        toastMessage.textContent = message;
+        
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+    }
+    // Handle modal switching
+    document.querySelectorAll('[data-bs-toggle="modal"]').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.getAttribute('data-bs-target');
+            if (target) {
+                const modal = new bootstrap.Modal(document.querySelector(target));
+                modal.show();
+            }
+        });
+    });
+    
+
+    </script>
+</body>
+</html>

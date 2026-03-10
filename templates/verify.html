@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - WinPrize</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            padding: 20px;
+        }
+        .verify-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        .verify-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .verify-header i {
+            font-size: 60px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .verify-header h2 {
+            color: #333;
+            font-weight: 700;
+        }
+        .verify-header p {
+            color: #666;
+        }
+        .email-display {
+            background: #f0f3ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .email-display strong {
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+        .pin-input {
+            width: 60px;
+            height: 70px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            border: 3px solid #dee2e6;
+            border-radius: 10px;
+            margin: 0 5px;
+            transition: all 0.3s;
+        }
+        .pin-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25);
+            outline: none;
+        }
+        .pin-input:valid {
+            border-color: #28a745;
+        }
+        .timer-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .timer {
+            font-size: 36px;
+            font-weight: 700;
+            color: #dc3545;
+            font-family: monospace;
+        }
+        .btn-verify {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        .btn-verify:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .btn-verify:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .btn-resend {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-resend:hover {
+            background: #667eea;
+            color: white;
+        }
+        .attempts {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-card" data-aos="fade-up">
+        <div class="verify-header">
+            <i class="fas fa-envelope-open-text"></i>
+            <h2>Verify Your Email</h2>
+            <p class="text-muted">Enter the 6-digit PIN sent to your email</p>
+        </div>
+
+        <div class="email-display">
+            <i class="fas fa-envelope me-2 text-primary"></i>
+            <strong id="displayEmail">Loading...</strong>
+        </div>
+
+        <div id="errorAlert" class="alert alert-danger" style="display: none;"></div>
+        <div id="successAlert" class="alert alert-success" style="display: none;"></div>
+
+        <div class="timer-box">
+            <i class="fas fa-clock me-2 text-warning"></i>
+            <span>Time remaining:</span>
+            <div class="timer" id="timer">20:00</div>
+        </div>
+
+        <form id="verifyForm" onsubmit="event.preventDefault(); verifyPIN();">
+            <div class="d-flex justify-content-center mb-4">
+                <input type="text" class="pin-input" id="pin1" maxlength="1" pattern="[0-9]" inputmode="numeric" autofocus>
+                <input type="text" class="pin-input" id="pin2" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="pin-input" id="pin3" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="pin-input" id="pin4" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="pin-input" id="pin5" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="pin-input" id="pin6" maxlength="1" pattern="[0-9]" inputmode="numeric">
+            </div>
+
+            <div class="attempts text-center" id="attemptsMessage"></div>
+
+            <button type="submit" class="btn-verify mb-3" id="verifyBtn">
+                <i class="fas fa-check-circle me-2"></i>Verify PIN
+            </button>
+        </form>
+
+        <div class="text-center">
+            <p class="text-muted">Didn't receive the PIN?</p>
+            <button class="btn-resend" onclick="resendPIN()" id="resendBtn">
+                <i class="fas fa-redo-alt me-2"></i>Resend PIN
+            </button>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/" class="text-decoration-none">
+                <i class="fas fa-arrow-left me-1"></i>Back to Home
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init();
+
+        let expiryTime = null;
+        let timerInterval = null;
+        let email = localStorage.getItem("verification_email");
+
+        if (!email) {
+            window.location.href = "/";
+        }
+
+        document.getElementById('displayEmail').textContent = email;
+
+        // PIN input auto-focus
+        const pinInputs = document.querySelectorAll('.pin-input');
+        pinInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                if (this.value.length === 1) {
+                    if (index < pinInputs.length - 1) {
+                        pinInputs[index + 1].focus();
+                    }
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value && index > 0) {
+                    pinInputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const paste = e.clipboardData.getData('text');
+                const digits = paste.replace(/\D/g, '').split('');
+                
+                digits.forEach((digit, i) => {
+                    if (i < pinInputs.length) {
+                        pinInputs[i].value = digit;
+                    }
+                });
+                
+                if (digits.length === pinInputs.length) {
+                    pinInputs[pinInputs.length - 1].focus();
+                }
+            });
+        });
+
+        // Load timer from localStorage if exists
+        function loadTimer() {
+            const savedExpiry = localStorage.getItem("pin_expiry");
+            if (savedExpiry) {
+                expiryTime = parseInt(savedExpiry);
+                startTimer();
+            } else {
+                // Set initial 20 minutes
+                expiryTime = Date.now() + (20 * 60 * 1000);
+                localStorage.setItem("pin_expiry", expiryTime);
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                const now = Date.now();
+                const remaining = expiryTime - now;
+                
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('timer').textContent = "00:00";
+                    document.getElementById('timer').style.color = '#dc3545';
+                    document.getElementById('verifyBtn').disabled = true;
+                    document.getElementById('resendBtn').disabled = false;
+                    localStorage.removeItem("pin_expiry");
+                    showError("PIN has expired. Please request a new one.");
+                } else {
+                    const minutes = Math.floor(remaining / 60000);
+                    const seconds = Math.floor((remaining % 60000) / 1000);
+                    document.getElementById('timer').textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    if (remaining < 300000) { // Less than 5 minutes
+                        document.getElementById('timer').style.color = '#dc3545';
+                    }
+                }
+            }, 1000);
+        }
+
+        loadTimer();
+
+        async function verifyPIN() {
+            const pin = Array.from(pinInputs).map(input => input.value).join('');
+            
+            if (pin.length !== 6) {
+                showError("Please enter all 6 digits");
+                return;
+            }
+
+            const verifyBtn = document.getElementById('verifyBtn');
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verifying...';
+
+            try {
+                const res = await fetch("/verify/verify-pin", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, pin })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showSuccess("Email verified successfully! Redirecting...");
+                    
+                    // Store user data
+                    localStorage.setItem("loggedUser", JSON.stringify(data.user));
+                    localStorage.removeItem("verification_email");
+                    localStorage.removeItem("pin_expiry");
+                    
+                    // Redirect to home
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 2000);
+                } else {
+                    showError(data.detail || "Invalid PIN");
+                    verifyBtn.disabled = false;
+                    verifyBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Verify PIN';
+                    
+                    // Clear inputs
+                    pinInputs.forEach(input => input.value = '');
+                    pinInputs[0].focus();
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                showError("An error occurred. Please try again.");
+                verifyBtn.disabled = false;
+                verifyBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Verify PIN';
+            }
+        }
+
+        async function resendPIN() {
+            const resendBtn = document.getElementById('resendBtn');
+            resendBtn.disabled = true;
+            resendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+
+            try {
+                const res = await fetch("/verify/resend-pin", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showSuccess("New PIN sent to your email!");
+                    
+                    // Reset timer
+                    expiryTime = Date.now() + (20 * 60 * 1000);
+                    localStorage.setItem("pin_expiry", expiryTime);
+                    startTimer();
+                    
+                    // Enable verify button
+                    document.getElementById('verifyBtn').disabled = false;
+                    
+                    // Clear inputs
+                    pinInputs.forEach(input => input.value = '');
+                    pinInputs[0].focus();
+                } else {
+                    showError(data.detail || "Failed to resend PIN");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                showError("An error occurred. Please try again.");
+            } finally {
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = '<i class="fas fa-redo-alt me-2"></i>Resend PIN';
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('errorAlert').style.display = 'block';
+            document.getElementById('errorAlert').textContent = message;
+            document.getElementById('successAlert').style.display = 'none';
+            
+            setTimeout(() => {
+                document.getElementById('errorAlert').style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            document.getElementById('successAlert').style.display = 'block';
+            document.getElementById('successAlert').textContent = message;
+            document.getElementById('errorAlert').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
