@@ -11,5 +11,18 @@
         "attempts": 0,
         "user_status": "user",
         "verified_at": "10/03/2026T14h:37m:10s"
+    },
+    {
+        "id": "caee063b-1f19-4424-b4fa-c72d2e1afc7c",
+        "email": "art2urdu@gmail.com",
+        "name": "Arshad Ali",
+        "password": "Arshad@2020",
+        "pin": "188622",
+        "created_at": "11/03/2026T17h:01m:12s",
+        "expires_at": "11/03/2026T17h:21m:12s",
+        "verified": true,
+        "attempts": 0,
+        "user_status": "user",
+        "verified_at": "11/03/2026T17h:03m:18s"
     }
 ]

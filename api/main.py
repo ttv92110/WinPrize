@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse
 from api.startup import startup_event
 from pathlib import Path
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import auth_routes, draw_routes, admin_routes, payment_routes, password_routes, verification_routes, notification_routes
 
@@ -53,7 +54,13 @@ app.include_router(payment_routes.router)
 app.include_router(password_routes.router)
 app.include_router(verification_routes.router) 
 app.include_router(notification_routes.router)    
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # پیداوار میں مخصوص domains رکھیں
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
@@ -120,3 +127,17 @@ async def health_check():
 @app.get("/api")
 async def root():
     return {"message": "Win Prize API"}
+
+@app.get("/debug/email-config")
+async def debug_email_config():
+    """Check email configuration (safe version)"""
+    from api.utils.email import EmailService
+    email_service = EmailService()
+    return {
+        "smtp_host": email_service.smtp_host,
+        "smtp_port": email_service.smtp_port,
+        "smtp_user": email_service.smtp_user,
+        "from_email": email_service.from_email,
+        "from_name": email_service.from_name,
+        "smtp_password_set": "yes" if email_service.smtp_password else "no"
+    }
