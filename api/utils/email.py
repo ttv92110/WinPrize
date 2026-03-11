@@ -8,7 +8,7 @@ class EmailService:
     def __init__(self):
         # Email configuration - Update with your email settings
         self.smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
-        self.smtp_port = int(os.getenv("SMTP_PORT", 587))
+        self.smtp_port = int(os.getenv("SMTP_PORT", 465))
         self.smtp_user = os.getenv("SMTP_USER", "your-email@gmail.com")
         self.smtp_password = os.getenv("SMTP_PASSWORD", "your-app-password")
         self.from_email = os.getenv("FROM_EMAIL", "noreply@winprize.com")
@@ -267,7 +267,7 @@ class EmailService:
                 username=self.smtp_user,
                 password=self.smtp_password,
                 start_tls=True,
-                timeout=30
+                timeout=120
             )
             
             print(f"Verification PIN sent to {to_email}")
@@ -555,7 +555,7 @@ class EmailService:
                 username=self.smtp_user,
                 password=self.smtp_password,
                 start_tls=True,
-                timeout=30
+                timeout=120
             )
             
             print(f"Password reset email sent to {to_email}")
@@ -738,7 +738,7 @@ class EmailService:
                 username=self.smtp_user,
                 password=self.smtp_password,
                 start_tls=True,
-                timeout=30
+                timeout=120
             )
             
             # await aiosmtplib.send(
