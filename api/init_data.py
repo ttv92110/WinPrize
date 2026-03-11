@@ -90,19 +90,19 @@ def init_data_files():
         expires = now + timedelta(days=1)
         date_format = "%d/%m/%YT%Hh:%Mm:%Ss"
         sample_draws = [
-            {
-                "id": "lucky_00001",
-                "user_pay": 1,
-                "time_interval": "day",
-                "winner_get": 100,
-                "created_at": now.strftime(date_format),
-                "closed_at": expires.strftime(date_format),
-                "status": "open",
-                "visible": True,
-                "title": "Daily Draw #1",
-                "description": "Win Rs. 100 with just Rs. 1",
-                "auto_complete": True
-            }
+            # {
+            #     "id": "lucky_00001",
+            #     "user_pay": 1,
+            #     "time_interval": "day",
+            #     "winner_get": 100,
+            #     "created_at": now.strftime(date_format),
+            #     "closed_at": expires.strftime(date_format),
+            #     "status": "open",
+            #     "visible": True,
+            #     "title": "Daily Draw #1",
+            #     "description": "Win Rs. 100 with just Rs. 1",
+            #     "auto_complete": True
+            # }
         ]
         with open(lucky_draws_file, 'w') as f:
             json.dump(sample_draws, f, indent=4)
