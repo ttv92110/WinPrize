@@ -114,8 +114,8 @@ def init_data_files():
 # Run initialization when module is imported
 if __name__ == "__main__":
     pass
-    # init_data_files()
+    init_data_files()
 else:
     pass
     # Auto-run when imported
-    # init_data_files()
+    init_data_files()
