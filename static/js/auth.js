@@ -1,5 +1,4 @@
-// Login function
-// Update user menu based on login status
+
 function updateUserMenu() {
     const user = JSON.parse(localStorage.getItem("loggedUser"));
     const userMenu = document.getElementById("userMenu");
@@ -96,6 +95,7 @@ async function updateNotificationBadge() {
 // ===================================================
 
 // Modify login function to store user_status
+// Modify login function to store user_status
 async function login() {
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
@@ -130,9 +130,23 @@ async function login() {
             };
             localStorage.setItem("loggedUser", JSON.stringify(userData));
 
-            // Close modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
-            modal.hide();
+            // ========== درست طریقہ: پہلے backdrop ہٹائیں ==========
+            const modal = document.getElementById('loginModal');
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+
+            // پہلے backdrop چھپائیں
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+
+            // پھر modal بند کریں
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+
+            // body سے modal-open کلاس ہٹائیں
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '0';
+            // ======================================================
 
             // Show success message
             showToast("Login successful! Welcome back!", "success");
@@ -164,6 +178,7 @@ async function login() {
 }
 
 // Forgot password function
+// Forgot password function
 async function forgotPassword() {
     const email = document.getElementById("forgotEmail").value;
 
@@ -187,9 +202,23 @@ async function forgotPassword() {
         const data = await res.json();
 
         if (data.success) {
-            // Close forgot password modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('forgotPasswordModal'));
-            modal.hide();
+            // ========== درست طریقہ: پہلے backdrop ہٹائیں ==========
+            const modal = document.getElementById('forgotPasswordModal');
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+
+            // پہلے backdrop چھپائیں
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+
+            // پھر modal بند کریں
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+
+            // body سے modal-open کلاس ہٹائیں
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '0';
+            // ======================================================
 
             // Show success message
             showToast(data.message, "success");
@@ -214,6 +243,7 @@ async function forgotPassword() {
     }
 }
 
+// Signup function with email verification
 // Signup function with email verification
 async function signup() {
     const name = document.getElementById("registerName").value;
@@ -268,9 +298,23 @@ async function signup() {
         const data = await res.json();
 
         if (data.success) {
-            // Close register modal
-            const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
-            registerModal.hide();
+            // ========== درست طریقہ: پہلے backdrop ہٹائیں ==========
+            const modal = document.getElementById('registerModal');
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+
+            // پہلے backdrop چھپائیں
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+
+            // پھر modal بند کریں
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+
+            // body سے modal-open کلاس ہٹائیں
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = 'auto';
+            document.body.style.paddingRight = '0';
+            // ======================================================
 
             // Store email for verification page
             localStorage.setItem("verification_email", email);
