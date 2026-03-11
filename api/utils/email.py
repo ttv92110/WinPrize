@@ -735,8 +735,16 @@ class EmailService:
                 port=self.smtp_port,
                 username=self.smtp_user,
                 password=self.smtp_password,
-                start_tls=True
+                use_tls=True  # ← 465 کے لیے یہ استعمال کریں
             )
+            # await aiosmtplib.send(
+            #     message,
+            #     hostname=self.smtp_host,
+            #     port=self.smtp_port,
+            #     username=self.smtp_user,
+            #     password=self.smtp_password,
+            #     start_tls=True
+            # )
             
             print(f"Welcome email sent to {to_email}")
             return True
