@@ -266,7 +266,6 @@ class EmailService:
                 port=self.smtp_port,
                 username=self.smtp_user,
                 password=self.smtp_password,
-                # use_tls=True # start_tls=True
                 start_tls=True,
                 timeout=30
             )
@@ -555,7 +554,6 @@ class EmailService:
                 port=self.smtp_port,
                 username=self.smtp_user,
                 password=self.smtp_password,
-                # use_tls=True # start_tls=True
                 start_tls=True,
                 timeout=30
             )
@@ -739,10 +737,10 @@ class EmailService:
                 port=self.smtp_port,
                 username=self.smtp_user,
                 password=self.smtp_password,
-                # use_tls=True # start_tls=True
                 start_tls=True,
                 timeout=30
             )
+            
             # await aiosmtplib.send(
             #     message,
             #     hostname=self.smtp_host,

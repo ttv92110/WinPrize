@@ -1,17 +1,10 @@
 [
     {
+        "id": "ffb6a495-4843-4801-898c-96d82bc4a72e",
         "name": "Admin User",
         "email": "ttv92110@gmail.com",
         "password": "admin@2020",
         "user_status": "staff",
-        "id": "55f124a3-b12c-4289-90a3-8a592e411ac7"
-    },
-    {
-        "id": "ffb6a495-4843-4801-898c-96d82bc4a72e",
-        "name": "Arshad Ali",
-        "email": "art2urdu@gmail.com",
-        "password": "Arshad@2020",
-        "user_status": "user",
         "email_verified": true,
         "verified_at": "11/03/2026T17h:03m:18s"
     }
