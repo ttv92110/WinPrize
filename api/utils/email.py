@@ -266,7 +266,7 @@ class EmailService:
                 port=self.smtp_port,
                 username=self.smtp_user,
                 password=self.smtp_password,
-                start_tls=True
+                use_tls=True # start_tls=True
             )
             
             print(f"Verification PIN sent to {to_email}")
@@ -553,7 +553,7 @@ class EmailService:
                 port=self.smtp_port,
                 username=self.smtp_user,
                 password=self.smtp_password,
-                start_tls=True
+                use_tls=True # start_tls=True
             )
             
             print(f"Password reset email sent to {to_email}")
@@ -752,3 +752,4 @@ class EmailService:
         except Exception as e:
             print(f"Error sending welcome email: {str(e)}")
             return False
+        

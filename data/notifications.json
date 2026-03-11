@@ -1,1 +1,17 @@
-[]
+[
+    {
+        "id": "d0918d32-799f-47a7-be10-6c281a0e6701",
+        "user_email": "art2urdu@gmail.com",
+        "title": "\ud83c\udf89 New Lucky Draw Added!",
+        "message": "New 12 Hours Draw: Win Rs. 100 with just Rs. 1!",
+        "type": "new_draw",
+        "draw_id": "lucky_00001",
+        "draw_title": "small Drwa",
+        "amount": 100,
+        "read": false,
+        "created_at": "11/03/2026T19h:46m:15s",
+        "expires_at": "18/03/2026T19h:46m:15s",
+        "action_url": "/confirm?draw=lucky_00001",
+        "action_text": "Join Now"
+    }
+]

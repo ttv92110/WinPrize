@@ -1,1 +1,16 @@
-[]
+[
+    {
+        "user_pay": 1,
+        "time_interval": "12hours",
+        "winner_get": 100,
+        "visible": true,
+        "auto_complete": false,
+        "title": "small Drwa",
+        "max_participants": 1000,
+        "id": "lucky_00001",
+        "status": "open",
+        "created_at": "11/03/2026T19h:46m:15s",
+        "closed_at": "12/03/2026T07h:46m:15s",
+        "description": "Win Rs. 100 with just Rs. 1"
+    }
+]
