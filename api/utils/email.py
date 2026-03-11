@@ -266,7 +266,9 @@ class EmailService:
                 port=self.smtp_port,
                 username=self.smtp_user,
                 password=self.smtp_password,
-                use_tls=True # start_tls=True
+                # use_tls=True # start_tls=True
+                start_tls=True,
+                timeout=30
             )
             
             print(f"Verification PIN sent to {to_email}")
@@ -553,7 +555,9 @@ class EmailService:
                 port=self.smtp_port,
                 username=self.smtp_user,
                 password=self.smtp_password,
-                use_tls=True # start_tls=True
+                # use_tls=True # start_tls=True
+                start_tls=True,
+                timeout=30
             )
             
             print(f"Password reset email sent to {to_email}")
@@ -735,7 +739,9 @@ class EmailService:
                 port=self.smtp_port,
                 username=self.smtp_user,
                 password=self.smtp_password,
-                use_tls=True  # ← 465 کے لیے یہ استعمال کریں
+                # use_tls=True # start_tls=True
+                start_tls=True,
+                timeout=30
             )
             # await aiosmtplib.send(
             #     message,
