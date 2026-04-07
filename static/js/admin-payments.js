@@ -147,7 +147,7 @@ async function approvePayment(paymentId) {
 
     const user = JSON.parse(localStorage.getItem("loggedUser"));
     if (!user) {
-        alert("Please login first");
+        showToast("Please login first");
         return;
     }
 
@@ -185,13 +185,13 @@ async function approvePayment(paymentId) {
                 }, 300);
             }
         } else {
-            alert(data.message || "Failed to approve payment");
+            showToast(data.message || "Failed to approve payment");
             approveBtn.disabled = false;
             approveBtn.innerHTML = originalText;
         }
     } catch (error) {
         console.error("Error approving payment:", error);
-        alert("An error occurred while approving payment");
+        showToast("An error occurred while approving payment");
         approveBtn.disabled = false;
         approveBtn.innerHTML = originalText;
     }
@@ -203,7 +203,7 @@ async function rejectPayment(paymentId) {
 
     const user = JSON.parse(localStorage.getItem("loggedUser"));
     if (!user) {
-        alert("Please login first");
+        showToast("Please login first");
         return;
     }
 
@@ -242,13 +242,13 @@ async function rejectPayment(paymentId) {
                 }, 300);
             }
         } else {
-            alert(data.message || "Failed to reject payment");
+            showToast(data.message || "Failed to reject payment");
             rejectBtn.disabled = false;
             rejectBtn.innerHTML = originalText;
         }
     } catch (error) {
         console.error("Error rejecting payment:", error);
-        alert("An error occurred while rejecting payment");
+        showToast("An error occurred while rejecting payment");
         rejectBtn.disabled = false;
         rejectBtn.innerHTML = originalText;
     }
@@ -308,7 +308,7 @@ function showToast(message, type = 'success') {
 
 function viewPaymentDetails(paymentId) {
     // You can implement a modal to show full payment details
-    alert("Payment details view - Implement modal here");
+    showToast("Payment details view - Implement modal here");
 }
 
 // Auto-refresh pending payments every 30 seconds

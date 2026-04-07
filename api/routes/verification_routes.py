@@ -167,8 +167,7 @@ async def verify_pin(data: dict):
             "verified_at": datetime.now().strftime("%d/%m/%YT%Hh:%Mm:%Ss")
         }
         
-        users_db.insert(user_data)
-        print(f"✅ User inserted into Google Sheets: {user_data['email']}")
+        users_db.insert(user_data) 
         
         # Mark verification as verified
         verification["verified"] = True
@@ -199,8 +198,7 @@ async def verify_pin(data: dict):
         
     except HTTPException:
         raise
-    except Exception as e:
-        print(f"Error verifying PIN: {str(e)}")
+    except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/resend-pin")
@@ -257,8 +255,7 @@ async def resend_pin(data: dict):
             
     except HTTPException:
         raise
-    except Exception as e:
-        print(f"Error resending PIN: {str(e)}")
+    except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/check/{email}")
@@ -288,6 +285,5 @@ async def check_verification_status(email: str):
         
         return {"verified": False, "message": "No verification found"}
         
-    except Exception as e:
-        print(f"Error checking verification: {str(e)}")
+    except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))

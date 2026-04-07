@@ -22,12 +22,7 @@ def init_data_files():
             }
         ]
         with open(users_file, 'w') as f:
-            json.dump(sample_users, f, indent=4)
-        print(f"✅ Initialized {users_file} with sample admin user")
-    
-    # باقی فائلیں ویسے ہی رہیں گی...
-    
-    print("\n🎉 All data files initialized successfully!")
+            json.dump(sample_users, f, indent=4)  
 
 
 # Run initialization when module is imported

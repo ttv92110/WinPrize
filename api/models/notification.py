@@ -30,3 +30,4 @@ class NotificationCreate(BaseModel):
     amount: Optional[int] = None
     action_url: Optional[str] = None
     action_text: Optional[str] = "View Draw"
+    

@@ -23,3 +23,4 @@ class VerifyPinRequest(BaseModel):
 
 class ResendPinRequest(BaseModel):
     email: str
+    

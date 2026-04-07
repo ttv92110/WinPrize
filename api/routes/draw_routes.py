@@ -14,21 +14,25 @@ users_db = sheets_db_manager.users_db
 user_draws_db = sheets_db_manager.user_draws_db
 # ===================================================
 
+
 @router.get("/", response_model=List[LuckyDrawResponse])
 async def get_draws():
     draws = lucky_db.read_all()
     current_time = datetime.now()
-    
-    # Check and update draw status based on closed_at
+     
     for draw in draws:
         if draw.get("status") == "open" and draw.get("closed_at"):
-            try:
+            try: 
                 closed_time = datetime.strptime(draw["closed_at"], "%d/%m/%YT%Hh:%Mm:%Ss")
-                if current_time > closed_time:
-                    draw["status"] = "awaiting"
-                    lucky_db.update(draw["id"], {"status": "awaiting"})
-            except:
-                pass
+                 
+                if current_time > closed_time: 
+                    if draw.get("auto_complete", True):
+                        draw["status"] = "awaiting"
+                        lucky_db.update(draw["id"], {"status": "awaiting"}) 
+            except Exception as e:
+                # If date parsing fails, don't change the status 
+                print(str(e))
+                continue
     
     # Only return visible draws
     return [d for d in draws if d.get("visible", False)]

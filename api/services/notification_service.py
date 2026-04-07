@@ -39,8 +39,7 @@ class NotificationService:
                 "action_text": action_text
             }
             
-            self.notifications_db.insert(notification)
-            print(f"Notification created for {user_email}: {title}")
+            self.notifications_db.insert(notification) 
             return notification
         except Exception as e:
             print(f"Error creating notification: {str(e)}")
@@ -72,8 +71,7 @@ class NotificationService:
                     action_text=action_text
                 )
                 notifications_sent += 1
-            
-            print(f"Broadcast notification sent to {notifications_sent} users")
+             
             return notifications_sent
         except Exception as e:
             print(f"Error broadcasting notification: {str(e)}")

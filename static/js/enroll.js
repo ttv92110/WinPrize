@@ -20,21 +20,21 @@ document.addEventListener('DOMContentLoaded', function () {
 async function confirmEnroll() {
     let user = JSON.parse(localStorage.getItem("loggedUser"));
     if (!user) {
-        alert("Please login first");
+        showToast("Please login first", "alert");
         window.location.href = "/login";
         return;
     }
 
     let draw = JSON.parse(localStorage.getItem("selected_draw"));
     if (!draw) {
-        alert("No draw selected");
+        showToast("No draw selected", "info");
         window.location.href = "/";
         return;
     }
 
     let email = document.getElementById("email").value;
     if (!email) {
-        alert("Please enter your email");
+        showToast("Please enter your email", "alert");
         return;
     }
 
@@ -52,15 +52,15 @@ async function confirmEnroll() {
         let data = await res.json();
 
         if (data.success) {
-            alert("Successfully enrolled in the draw!");
+            showToast("Successfully enrolled in the draw!", "success");
             localStorage.removeItem("selected_draw"); // Clear selected draw
             window.location.href = "/";
         } else {
-            alert(data.message || "Failed to enroll.Maybe participant completed.");
+            showToast(data.message || "Failed to enroll.Maybe participant completed.");
         }
     } catch (error) {
         console.error("Error:", error);
-        alert("An error occurred. Please try again.");
+        showToast("An error occurred. Please try again.", "error");
     }
 }
 

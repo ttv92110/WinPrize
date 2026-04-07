@@ -64,8 +64,7 @@ class EmailService:
                 start_tls=True,
                 timeout=120
             )
-            
-            print(f"Verification PIN sent to {to_email}")
+             
             return True
             
         except Exception as e:
@@ -122,8 +121,7 @@ class EmailService:
                 start_tls=True,
                 timeout=120
             )
-            
-            print(f"Password reset email sent to {to_email}")
+             
             return True
             
         except Exception as e:
@@ -173,8 +171,6 @@ class EmailService:
                 timeout=120
             )
             
-            
-            print(f"Welcome email sent to {to_email}")
             return True
             
         except Exception as e:
@@ -230,8 +226,7 @@ class EmailService:
                 start_tls=True,
                 timeout=120
             )
-            
-            print(f"New draw notification email sent to {to_email}")
+             
             return True
         except Exception as e:
             print(f"Error sending new draw notification: {str(e)}")
@@ -304,8 +299,7 @@ class EmailService:
                 start_tls=True,
                 timeout=120
             )
-            
-            print(f"Draw result notification email sent to {to_email}")
+             
             return True
         except Exception as e:
             print(f"Error sending draw result notification: {str(e)}")

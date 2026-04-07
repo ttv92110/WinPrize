@@ -51,8 +51,7 @@ class GoogleSheetsDB:
             # Open spreadsheet and worksheet
             spreadsheet = self._client.open(self.sheet_name)
             self._worksheet = spreadsheet.worksheet(self.worksheet_name)
-            
-            print(f"✅ Connected to Google Sheet: {self.sheet_name}/{self.worksheet_name}")
+             
             
         except Exception as e:
             print(f"❌ Error connecting to Google Sheets: {str(e)}")
@@ -67,13 +66,11 @@ class GoogleSheetsDB:
         try:
             existing_data = self._worksheet.get_all_values()
             if not existing_data or len(existing_data) < 1:
-                self._worksheet.append_row(headers)
-                print(f"✅ Headers added to {self.worksheet_name}")
+                self._worksheet.append_row(headers) 
         except Exception as e:
             print(f"Error ensuring headers: {str(e)}")
     
-    def read_all(self) -> List[Dict]:
-        """Read all records from Google Sheet"""
+    def read_all(self) -> List[Dict]: 
         if not self._worksheet:
             return []
         
@@ -119,8 +116,7 @@ class GoogleSheetsDB:
             print(f"Error inserting into Google Sheets: {str(e)}")
             return record
     
-    def find_by_id(self, id: str) -> Optional[Dict]:
-        """Find record by ID"""
+    def find_by_id(self, id: str) -> Optional[Dict]: 
         if not self._worksheet:
             return None
         
@@ -134,8 +130,7 @@ class GoogleSheetsDB:
             print(f"Error finding by ID: {str(e)}")
             return None
     
-    def find_by_field(self, field: str, value: Any) -> List[Dict]:
-        """Find records by field value (case-insensitive)"""
+    def find_by_field(self, field: str, value: Any) -> List[Dict]: 
         if not self._worksheet:
             return []
         
@@ -157,8 +152,7 @@ class GoogleSheetsDB:
                 
                 if str(record_value).lower().strip() == search_value:
                     result.append(r)
-            
-            print(f"🔍 find_by_field({field}={value}) found {len(result)} records")
+             
             return result
         except Exception as e:
             print(f"Error finding by field: {str(e)}")

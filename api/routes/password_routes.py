@@ -88,19 +88,15 @@ async def forgot_password(request: Request, data: dict):
         
         if email_sent:
             return {"success": True, "message": "Password reset instructions have been sent to your email"}
-        else:
-            print(f"Failed to send email to {user['email']}")
-            return {"success": True, "message": "If your email exists, you will receive reset instructions"}
+        else: 
+            return {"success": True, "message": f"If your email exists, you will receive reset instructions. : \n{user['email']}"}
             
-    except Exception as e:
-        print(f"Error in forgot_password: {str(e)}")
+    except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/reset/{token}", response_class=HTMLResponse)
 async def reset_password_page(request: Request, token: str):
-    try:
-        print(f"🔍 Looking for token: {token}")
-        
+    try: 
         resets = password_resets_db.find_by_field("token", token)
         
         if not resets:
@@ -113,8 +109,7 @@ async def reset_password_page(request: Request, token: str):
         
         # ========== اہم تبدیلی ==========
         # Google Sheets سے `used` کی value string میں آ سکتی ہے
-        used_value = reset.get("used")
-        print(f"🔍 used field value: '{used_value}' (type: {type(used_value)})")
+        used_value = reset.get("used") 
         
         # مختلف possibilities کے لیے check
         is_used = False
@@ -133,9 +128,7 @@ async def reset_password_page(request: Request, token: str):
         else:
             # default: agar kuch bhi nahi hai to False maano
             is_used = False
-        
-        print(f"🔍 is_used: {is_used}")
-        
+          
         if is_used:
             return templates.TemplateResponse(
                 "reset_password_error.html", 
@@ -156,11 +149,10 @@ async def reset_password_page(request: Request, token: str):
             {"request": request, "token": token, "email": reset["user_email"]}
         )
         
-    except Exception as e:
-        print(f"Error: {str(e)}")
+    except Exception as e: 
         return templates.TemplateResponse(
             "reset_password_error.html", 
-            {"request": request, "error": "An error occurred"}
+            {"request": request, "error": f"An error occurred. \n Error: {str(e)}"}
         )
 
 
@@ -222,8 +214,7 @@ async def reset_password(token: str, data: dict):
         
     except HTTPException:
         raise
-    except Exception as e:
-        print(f"Error in reset_password: {str(e)}")
+    except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/check/{token}")
@@ -248,6 +239,5 @@ async def check_token_valid(token: str):
         
         return {"valid": True, "email": reset["user_email"]}
         
-    except Exception as e:
-        print(f"Error checking token: {str(e)}")
-        return {"valid": False, "reason": "Error checking token"}
+    except Exception as e: 
+        return {"valid": False, "reason": f"Error checking token : {str(e)}"}

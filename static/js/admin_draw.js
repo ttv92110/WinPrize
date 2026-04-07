@@ -32,36 +32,12 @@ async function runDraw(drawId) {
         } else {
             showToast(data.message || "Failed to run draw", "danger");
         }
-    } catch (error) {
-        console.error("Error running draw:", error);
-        showToast("An error occurred", "danger");
+    } catch (error) { 
+        showToast(`An error occurred : ${error}`, "danger");
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
     }
-    // if (!confirm(`Are you sure you want to run this draw?`)) {
-    //     return;
-    // }
-
-    // try {
-    //     let res = await fetch(`/admin/run-draw/${drawId}`, {
-    //         method: "POST"
-    //     });
-    //     let data = await res.json();
-
-    //     if (data.success) {
-    //         if (data.winner) {
-    //             alert(`Winner: ${data.winner.user_email}`);
-    //         } else {
-    //             alert("No participants for this draw");
-    //         }
-    //     } else {
-    //         alert(data.message || "Failed to run draw");
-    //     }
-    // } catch (error) {
-    //     console.error("Error:", error);
-    //     alert("An error occurred while running the draw");
-    // }
 }
 
 async function createNewDraw() {
@@ -87,10 +63,9 @@ async function createNewDraw() {
         });
 
         let data = await res.json();
-        alert(data.message);
+        // alert(data.message);
         location.reload();
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Failed to create draw");
+    } catch (error) { 
+        console(`Failed to create draw . ${error}`);
     }
 }

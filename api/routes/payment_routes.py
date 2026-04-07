@@ -114,8 +114,7 @@ async def create_payment(payment: PaymentCreate):
         }
     except HTTPException:
         raise
-    except Exception as e:
-        print(f"Error creating payment: {str(e)}")
+    except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/user/{email}")
@@ -125,8 +124,7 @@ async def get_user_payments(email: str):
         payments = payments_db.find_by_field("user_email", email)
         payments.sort(key=lambda x: x.get("created_at", ""), reverse=True)
         return payments
-    except Exception as e:
-        print(f"Error getting user payments: {str(e)}")
+    except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/draw/{draw_id}")
@@ -135,8 +133,7 @@ async def get_draw_payments(draw_id: str):
     try:
         payments = payments_db.find_by_field("lucky_draw_id", draw_id)
         return payments
-    except Exception as e:
-        print(f"Error getting draw payments: {str(e)}")
+    except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/pending")
@@ -146,8 +143,7 @@ async def get_pending_payments():
         all_payments = payments_db.read_all()
         pending = [p for p in all_payments if p.get("status") == "pending"]
         return pending
-    except Exception as e:
-        print(f"Error getting pending payments: {str(e)}")
+    except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/update/{payment_id}")
@@ -205,8 +201,7 @@ async def update_payment_status(payment_id: str, update: PaymentUpdate):
                     break
         
         return {"success": True, "message": f"Payment status updated to {update.status}"}
-    except Exception as e:
-        print(f"Error updating payment: {str(e)}")
+    except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/check/{email}/{draw_id}")
@@ -222,8 +217,7 @@ async def check_payment_status(email: str, draw_id: str):
                     "payment_id": payment.get("id")
                 }
         return {"has_payment": False}
-    except Exception as e:
-        print(f"Error checking payment: {str(e)}")
+    except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/reject-payment/{payment_id}")
@@ -285,8 +279,7 @@ async def reject_payment(payment_id: str, request: Request):
             "message": "Payment rejected. User has been removed from the draw.",
             "user_removed": deleted
         }
-    except Exception as e:
-        print(f"Error rejecting payment: {str(e)}")
+    except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/approve-payment/{payment_id}")
@@ -315,6 +308,5 @@ async def approve_payment(payment_id: str, request: Request):
         # ... باقی کوڈ ویسے ہی ...
         
         return {"success": True, "message": "Payment approved successfully. User enrolled in draw."}
-    except Exception as e:
-        print(f"Error approving payment: {str(e)}")
+    except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))

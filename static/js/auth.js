@@ -166,9 +166,8 @@ async function login() {
         } else {
             showToast(data.message || "Invalid email or password", "danger");
         }
-    } catch (error) {
-        console.error("Error:", error);
-        showToast("An error occurred during login", "danger");
+    } catch (error) { 
+        showToast(`An error occurred during login : ${error}`, "danger");
     } finally {
         // Reset button state
         submitBtn.disabled = false;
@@ -234,9 +233,8 @@ async function forgotPassword() {
         } else {
             showToast(data.detail || "Failed to send reset email", "danger");
         }
-    } catch (error) {
-        console.error("Error:", error);
-        showToast("An error occurred. Please try again.", "danger");
+    } catch (error) { 
+        showToast(`An error occurred. Please try again. ${error}`, "danger");
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
@@ -335,9 +333,8 @@ async function signup() {
             spinner.classList.add("d-none");
             btnText.textContent = "Create Account";
         }
-    } catch (error) {
-        console.error("Error:", error);
-        showToast("An error occurred during registration", "danger");
+    } catch (error) { 
+        showToast(`An error occurred during registration, \n{error}`, "danger");
         submitBtn.disabled = false;
         spinner.classList.add("d-none");
         btnText.textContent = "Create Account";

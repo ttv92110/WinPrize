@@ -113,12 +113,12 @@ async function submitPayment() {
     const termsCheck = document.getElementById('termsCheck').checked;
 
     if (!holderName || !bankFrom || !accountFrom || !bankTo || !transactionId) {
-        alert("Please fill all required fields");
+        showToast("Please fill all required fields", "error");
         return;
     }
 
     if (!termsCheck) {
-        alert("Please confirm that you have made the payment");
+        showToast("Please confirm that you have made the payment", "alert");
         return;
     }
 
@@ -168,13 +168,13 @@ async function submitPayment() {
             }));
 
         } else {
-            alert(data.detail || "Failed to submit payment");
+            showToast(data.detail || "Failed to submit payment", "info");
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Submit Payment Details';
         }
     } catch (error) {
         console.error("Error submitting payment:", error);
-        alert("An error occurred. Please try again.");
+        showToast("An error occurred. Please try again.", "error");
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Submit Payment Details';
     }
