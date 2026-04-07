@@ -1,3 +1,6 @@
+from datetime import datetime
+from http.client import HTTPException
+
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -7,6 +10,8 @@ from pathlib import Path
 import os
 from fastapi.middleware.cors import CORSMiddleware
 
+from api.services.google_sheets_db import sheets_db_manager
+from api.config import Config
 from api.routes import auth_routes, draw_routes, admin_routes, payment_routes, password_routes, verification_routes, notification_routes
 
 # For Vercel serverless function
@@ -122,7 +127,38 @@ async def health_check():
         "static_dir_exists": static_dir.exists() if static_dir else False, 
         "templates_dir_exists": templates_dir.exists() if templates_dir else False
     }
- 
+    
+@app.post("/admin/sync-to-sheets")
+async def sync_to_sheets(request: Request): 
+    # Verify admin
+    body = await request.json()
+    user_email = body.get("user_email")
+    
+    from api.routes.admin_routes import is_admin
+    if not is_admin(user_email):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Sync all databases
+    from api.services.file_db import FileDB
+    
+    dbs = [
+        ("Users", sheets_db_manager.users_db, FileDB(str(Config.USERS_FILE))),
+        ("Draws", sheets_db_manager.draws_db, FileDB(str(Config.LUCKY_DRAWS_FILE))),
+        ("Payments", sheets_db_manager.payments_db, FileDB(str(Config.PAYMENTS_FILE))),
+        ("UserDraws", sheets_db_manager.user_draws_db, FileDB(str(Config.USER_DRAWS_FILE))),
+    ]
+    
+    results = {}
+    for name, sheets_db, file_db in dbs:
+        data = file_db.read_all()
+        sheets_db.write_all(data)
+        results[name] = len(data)
+    
+    return {
+        "success": True,
+        "message": "Data synced to Google Sheets",
+        "records": results
+    }
 # This is for Vercel serverless
 @app.get("/api")
 async def root():
@@ -141,3 +177,4 @@ async def debug_email_config():
         "from_name": email_service.from_name,
         "smtp_password_set": "yes" if email_service.smtp_password else "no"
     }
+

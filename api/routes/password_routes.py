@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from api.services.file_db import FileDB
+from api.services.google_sheets_db import sheets_db_manager
 from api.config import Config
 from datetime import datetime, timedelta
 import uuid
@@ -10,11 +10,12 @@ import os
 from pathlib import Path
 from api.utils.email import EmailService
 
-router = APIRouter(prefix="/password")  # This sets the prefix
+router = APIRouter(prefix="/password")
 
-# Database files
-users_db = FileDB(str(Config.USERS_FILE))
-password_resets_db = FileDB(str(Config.PASSWORD_RESETS_FILE))
+# ========== صرف Google Sheets استعمال کریں ==========
+users_db = sheets_db_manager.users_db
+password_resets_db = sheets_db_manager.password_resets_db
+# ===================================================
 
 # Email service
 email_service = EmailService()
@@ -28,10 +29,8 @@ templates = Jinja2Templates(directory=str(templates_dir))
 def get_base_url(request: Request):
     """Get base URL from request"""
     if os.getenv("VERCEL"):
-        # For Vercel production
         return f"https://{request.url.hostname}"
     else:
-        # For local development
         return f"{request.url.scheme}://{request.url.hostname}:{request.url.port}"
 
 @router.post("/forgot")
@@ -45,25 +44,22 @@ async def forgot_password(request: Request, data: dict):
         # Find user by email
         users = users_db.find_by_field("email", email)
         if not users:
-            # Don't reveal if user exists or not for security
             return {"success": True, "message": "If your email exists, you will receive reset instructions"}
         
         user = users[0]
         
-        # Check for existing unused reset tokens and mark them as used
+        # Mark existing unused tokens as used
         existing_resets = password_resets_db.find_by_field("user_email", email)
         for reset in existing_resets:
             if not reset.get("used", False):
                 password_resets_db.update(reset["id"], {"used": True})
         
-        # Generate unique token (one-time use)
+        # Generate unique token
         token = secrets.token_urlsafe(32)
         
         # Set expiration (1 hour from now)
         created_at = datetime.now()
         expires_at = created_at + timedelta(hours=1)
-        
-        # Format dates
         date_format = "%d/%m/%YT%Hh:%Mm:%Ss"
         
         # Create reset record
@@ -91,86 +87,82 @@ async def forgot_password(request: Request, data: dict):
         )
         
         if email_sent:
-            return {
-                "success": True, 
-                "message": "Password reset instructions have been sent to your email"
-            }
+            return {"success": True, "message": "Password reset instructions have been sent to your email"}
         else:
-            # Log the error but don't reveal to user
             print(f"Failed to send email to {user['email']}")
-            return {
-                "success": True, 
-                "message": "If your email exists, you will receive reset instructions"
-            }
+            return {"success": True, "message": "If your email exists, you will receive reset instructions"}
             
     except Exception as e:
         print(f"Error in forgot_password: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# THIS IS THE CRITICAL ROUTE - Make sure it's defined correctly
 @router.get("/reset/{token}", response_class=HTMLResponse)
 async def reset_password_page(request: Request, token: str):
-    """Show password reset page"""
     try:
-        print(f"Accessing reset page with token: {token}")  # Debug log
+        print(f"🔍 Looking for token: {token}")
         
-        # Find valid reset record
         resets = password_resets_db.find_by_field("token", token)
         
         if not resets:
-            print(f"No reset record found for token: {token}")
             return templates.TemplateResponse(
                 "reset_password_error.html", 
-                {
-                    "request": request, 
-                    "error": "Invalid or expired reset link"
-                }
+                {"request": request, "error": "Invalid or expired reset link"}
             )
         
         reset = resets[0]
-        print(f"Found reset record for user: {reset['user_email']}")
         
-        # Check if already used
-        if reset.get("used", False):
+        # ========== اہم تبدیلی ==========
+        # Google Sheets سے `used` کی value string میں آ سکتی ہے
+        used_value = reset.get("used")
+        print(f"🔍 used field value: '{used_value}' (type: {type(used_value)})")
+        
+        # مختلف possibilities کے لیے check
+        is_used = False
+        if used_value is True:
+            is_used = True
+        elif used_value == "True" or used_value == "TRUE":
+            is_used = True
+        elif used_value == "true":
+            is_used = True
+        elif used_value == 1 or used_value == "1":
+            is_used = True
+        elif used_value == "False":  # string "False" -> False
+            is_used = False
+        elif used_value == False:
+            is_used = False
+        else:
+            # default: agar kuch bhi nahi hai to False maano
+            is_used = False
+        
+        print(f"🔍 is_used: {is_used}")
+        
+        if is_used:
             return templates.TemplateResponse(
                 "reset_password_error.html", 
-                {
-                    "request": request, 
-                    "error": "This reset link has already been used"
-                }
+                {"request": request, "error": "This reset link has already been used"}
             )
+        # =================================
         
         # Check if expired
-        current_time = datetime.now()
         expires_at = datetime.strptime(reset["expires_at"], "%d/%m/%YT%Hh:%Mm:%Ss")
-        
-        if current_time > expires_at:
+        if datetime.now() > expires_at:
             return templates.TemplateResponse(
                 "reset_password_error.html", 
-                {
-                    "request": request, 
-                    "error": "This reset link has expired"
-                }
+                {"request": request, "error": "This reset link has expired"}
             )
         
-        # Show reset password form
         return templates.TemplateResponse(
             "reset_password.html", 
-            {
-                "request": request, 
-                "token": token,
-                "email": reset["user_email"]
-            }
+            {"request": request, "token": token, "email": reset["user_email"]}
         )
+        
     except Exception as e:
-        print(f"Error in reset_password_page: {str(e)}")
+        print(f"Error: {str(e)}")
         return templates.TemplateResponse(
             "reset_password_error.html", 
-            {
-                "request": request, 
-                "error": "An error occurred. Please try again."
-            }
+            {"request": request, "error": "An error occurred"}
         )
+
 
 @router.post("/reset/{token}")
 async def reset_password(token: str, data: dict):
@@ -188,17 +180,23 @@ async def reset_password(token: str, data: dict):
         if len(new_password) < 6:
             raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
         
-        # Find valid reset record
         resets = password_resets_db.find_by_field("token", token)
-        
         if not resets:
             raise HTTPException(status_code=400, detail="Invalid reset link")
         
         reset = resets[0]
         
-        # Check if already used
-        if reset.get("used", False):
+        # ========== used check بھی اسی طرح کریں ==========
+        used_value = reset.get("used")
+        is_used = False
+        if used_value is True or used_value == "True" or used_value == "TRUE" or used_value == "true":
+            is_used = True
+        elif used_value == 1 or used_value == "1":
+            is_used = True
+        
+        if is_used:
             raise HTTPException(status_code=400, detail="Reset link has already been used")
+        # ===================================================
         
         # Check if expired
         current_time = datetime.now()
@@ -212,18 +210,16 @@ async def reset_password(token: str, data: dict):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        # Update password (in production, hash it)
         users_db.update(user["id"], {"password": new_password})
         
-        # Mark reset as used
-        reset["used"] = True
-        reset["used_at"] = current_time.strftime("%d/%m/%YT%Hh:%Mm:%Ss")
-        password_resets_db.update(reset["id"], reset)
+        # Mark reset as used - TRUE ڈالیں
+        password_resets_db.update(reset["id"], {"used": "True"})
         
         return {
             "success": True,
             "message": "Password reset successfully. You can now login with your new password."
         }
+        
     except HTTPException:
         raise
     except Exception as e:
@@ -232,7 +228,7 @@ async def reset_password(token: str, data: dict):
 
 @router.get("/check/{token}")
 async def check_token_valid(token: str):
-    """Check if token is valid (for AJAX calls)"""
+    """Check if token is valid"""
     try:
         resets = password_resets_db.find_by_field("token", token)
         
@@ -251,7 +247,7 @@ async def check_token_valid(token: str):
             return {"valid": False, "reason": "Token expired"}
         
         return {"valid": True, "email": reset["user_email"]}
+        
     except Exception as e:
         print(f"Error checking token: {str(e)}")
         return {"valid": False, "reason": "Error checking token"}
-    

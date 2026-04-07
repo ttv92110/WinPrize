@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
+    USE_GOOGLE_SHEETS = os.getenv("USE_GOOGLE_SHEETS", "False").lower() == "true"
     # Use /tmp directory on Vercel (writable), otherwise local data directory
     if os.getenv("VERCEL"):
         DATA_DIR = Path("/tmp/data")
@@ -39,3 +40,4 @@ class Config:
     SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
     FROM_EMAIL = os.getenv("FROM_EMAIL", "noreply@winprize.com")
     FROM_NAME = os.getenv("FROM_NAME", "WinPrize Support")
+    

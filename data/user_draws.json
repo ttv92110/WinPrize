@@ -1,1 +1,18 @@
-[]
+[
+    {
+        "id": "5974726c-09e1-4bab-8408-44af56480312",
+        "user_email": "arsk92110@gmail.com",
+        "user_pay": 1,
+        "lucky_draw_id": "lucky_00001",
+        "status": "pending",
+        "joined_at": "06/04/2026T22h:24m:59s"
+    },
+    {
+        "id": "19cacc6d-bd66-4411-8fed-20921d1658a8",
+        "user_email": "arsk92110@gmail.com",
+        "user_pay": 1,
+        "lucky_draw_id": "lucky_00001",
+        "status": "pending",
+        "joined_at": "06/04/2026T23h:30m:03s"
+    }
+]

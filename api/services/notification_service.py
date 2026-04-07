@@ -1,4 +1,4 @@
-from api.services.file_db import FileDB
+from api.services.google_sheets_db import sheets_db_manager
 from api.config import Config
 from datetime import datetime, timedelta
 import uuid
@@ -6,8 +6,8 @@ from typing import List, Optional
 
 class NotificationService:
     def __init__(self):
-        self.notifications_db = FileDB(str(Config.NOTIFICATIONS_FILE))
-        self.users_db = FileDB(str(Config.USERS_FILE))
+        self.notifications_db = sheets_db_manager.notifications_db
+        self.users_db = sheets_db_manager.users_db
     
     def create_notification(self, user_email: str, title: str, message: str, 
                            notification_type: str, draw_id: Optional[str] = None,
@@ -94,7 +94,6 @@ class NotificationService:
                     if current_time <= expires_at:
                         active_notifications.append(n)
                 except:
-                    # If expiry date is invalid, keep the notification
                     active_notifications.append(n)
             
             # Sort by date (newest first)
@@ -154,7 +153,6 @@ class NotificationService:
                     else:
                         deleted += 1
                 except:
-                    # If date is invalid, keep it
                     to_keep.append(n)
             
             self.notifications_db.write_all(to_keep)

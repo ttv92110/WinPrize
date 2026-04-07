@@ -1,14 +1,19 @@
 from fastapi import APIRouter, HTTPException, Request
+from api.utils.email import EmailService
+from api.services.notification_service import notification_service
 from api.services.draw_engine import run_draw
-from api.services.file_db import FileDB
+from api.services.google_sheets_db import sheets_db_manager
 from api.config import Config
 from datetime import datetime, timedelta
 import uuid
 
 router = APIRouter(prefix="/admin")
-lucky_db = FileDB(str(Config.LUCKY_DRAWS_FILE))
-users_db = FileDB(str(Config.USERS_FILE))
-user_draws_db = FileDB(str(Config.USER_DRAWS_FILE))
+
+# ========== صرف Google Sheets استعمال کریں ==========
+lucky_db = sheets_db_manager.draws_db
+users_db = sheets_db_manager.users_db
+user_draws_db = sheets_db_manager.user_draws_db
+# ====================================================
 
 def is_admin(email: str) -> bool: 
     if not email:
@@ -33,7 +38,6 @@ async def get_all_draws_admin(request: Request):
                 try:
                     closed_time = datetime.strptime(draw["closed_at"], "%d/%m/%YT%Hh:%Mm:%Ss")
                     if current_time > closed_time:
-                        # Auto-mark as awaiting for admin attention
                         if draw.get("auto_complete", True):
                             draw["status"] = "awaiting"
                             lucky_db.update(draw["id"], {"status": "awaiting"})
@@ -78,28 +82,19 @@ async def create_draw(request: Request):
         time_interval = draw_data.get("time_interval", "day")
         
         # Calculate closed_at based on interval
-        if time_interval == "1hour":
-            closed_at = created_at + timedelta(hours=1)
-        elif time_interval == "12hours":
-            closed_at = created_at + timedelta(hours=12)
-        elif time_interval == "day":
-            closed_at = created_at + timedelta(days=1)
-        elif time_interval == "10days":
-            closed_at = created_at + timedelta(days=10)
-        elif time_interval == "15days":
-            closed_at = created_at + timedelta(days=15)
-        elif time_interval == "month":
-            closed_at = created_at + timedelta(days=30)
-        elif time_interval == "3months":
-            closed_at = created_at + timedelta(days=90)
-        elif time_interval == "6months":
-            closed_at = created_at + timedelta(days=180)
-        elif time_interval == "1year":
-            closed_at = created_at + timedelta(days=365)
-        else:
-            closed_at = created_at + timedelta(days=1)
+        interval_map = {
+            "1hour": timedelta(hours=1),
+            "12hours": timedelta(hours=12),
+            "day": timedelta(days=1),
+            "10days": timedelta(days=10),
+            "15days": timedelta(days=15),
+            "month": timedelta(days=30),
+            "3months": timedelta(days=90),
+            "6months": timedelta(days=180),
+            "1year": timedelta(days=365)
+        }
+        closed_at = created_at + interval_map.get(time_interval, timedelta(days=1))
         
-        # Format dates
         date_format = "%d/%m/%YT%Hh:%Mm:%Ss"
         
         # Get all draws to determine next ID
@@ -134,11 +129,9 @@ async def create_draw(request: Request):
         
         lucky_db.insert(draw_data)
         
-        # ========== نیا: تمام صارفین کو نوٹیفکیشن بھیجیں ==========
-        from api.services.notification_service import notification_service
+        # Send notifications to all users 
         
-        # Interval display for notification
-        interval_map = {
+        interval_display = {
             "1hour": "1 Hour",
             "12hours": "12 Hours", 
             "day": "Daily",
@@ -148,8 +141,7 @@ async def create_draw(request: Request):
             "3months": "3 Months",
             "6months": "6 Months",
             "1year": "1 Year"
-        }
-        interval_display = interval_map.get(time_interval, time_interval)
+        }.get(time_interval, time_interval)
         
         notification_service.broadcast_to_all_users(
             title="🎉 New Lucky Draw Added!",
@@ -160,9 +152,23 @@ async def create_draw(request: Request):
             amount=draw_data["winner_get"],
             action_url=f"/confirm?draw={draw_data['id']}",
             action_text="Join Now",
-            exclude_admins=True  # Admin کو نوٹیفکیشن نہ بھیجیں
+            exclude_admins=True
         )
-        # ====================================================
+        
+    # ========== Email بھیجیں تمام صارفین کو ========== 
+        email_service = EmailService()
+        
+        all_users = users_db.read_all()
+        for user in all_users:
+            if user.get("user_status") != "staff":  # Admin کو نہ بھیجیں
+                import asyncio
+                asyncio.create_task(email_service.send_new_draw_notification(
+                    to_email=user["email"],
+                    user_name=user["name"],
+                    draw_title=draw_data["title"],
+                    draw_prize=draw_data["winner_get"],
+                    draw_fee=draw_data["user_pay"]
+                ))
         
         return {"message": "Draw created successfully", "success": True, "draw": draw_data}
     except Exception as e:
@@ -453,3 +459,4 @@ async def reject_payment(payment_id: str, request: Request):
     except Exception as e:
         print(f"Error rejecting payment: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    

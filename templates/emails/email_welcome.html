@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: 600;
+            margin: 20px 0;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+        }
+        
+                    
+        @media screen and (max-width: 600px) {
+            .container {
+                max-width: 100% !important;
+                margin: 0 10px !important;
+            }
+            
+            .header {
+                padding: 30px 20px !important;
+            }
+            
+            .header h1 {
+                font-size: 24px !important;
+            }
+            
+            .content {
+                padding: 30px 20px !important;
+            }
+            
+            .content p {
+                font-size: 14px !important;
+                line-height: 1.5 !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .button {
+                padding: 12px 30px !important;
+                font-size: 14px !important;
+                margin: 15px 0 !important;
+            }
+            
+            .footer {
+                padding: 20px !important;
+            }
+            
+            .footer p {
+                font-size: 12px !important;
+                margin: 3px 0 !important;
+            }
+        }
+
+        @media screen and (max-width: 380px) {
+            .header {
+                padding: 25px 15px !important;
+            }
+            
+            .header h1 {
+                font-size: 22px !important;
+            }
+            
+            .content {
+                padding: 20px 15px !important;
+            }
+            
+            .content p {
+                font-size: 13px !important;
+                margin-bottom: 12px !important;
+            }
+            
+            .button {
+                padding: 10px 25px !important;
+                font-size: 13px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to WinPrize!</h1>
+        </div>
+        <div class="content">
+            <p>Hello <strong>{{ user_name }}</strong>,</p>
+            <p>Thank you for joining WinPrize! You're now ready to participate in exciting lucky draws and win amazing prizes.</p>
+            <p>Get started by browsing our active draws:</p>
+            <p style="text-align: center;">
+                <a href="https://winprize.onrender.com/#draws" class="button">View Active Draws</a>
+            </p>
+            <p>Good luck!</p>
+        </div>
+        <div class="footer">
+            <p>© 2026 WinPrize. All rights reserved.</p>
+            <p>Lahore, Pakistan</p>
+        </div>
+    </div>
+</body>
+</html>

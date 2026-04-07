@@ -1,10 +1,13 @@
 from fastapi import APIRouter, HTTPException, Request
 from api.services.notification_service import notification_service
-from api.services.file_db import FileDB
+from api.services.google_sheets_db import sheets_db_manager
 from api.config import Config
 
 router = APIRouter(prefix="/notifications")
-users_db = FileDB(str(Config.USERS_FILE))
+
+# ========== صرف Google Sheets استعمال کریں ==========
+users_db = sheets_db_manager.users_db
+# ===================================================
 
 def get_user_from_email(email: str):
     """Verify user exists"""
@@ -65,7 +68,7 @@ async def delete_notification(notification_id: str, request: Request):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        # Soft delete by marking as read (or you can implement actual delete)
+        # Soft delete by marking as read
         success = notification_service.mark_as_read(notification_id, email)
         if success:
             return {"success": True, "message": "Notification deleted"}
@@ -79,7 +82,7 @@ async def get_unread_count(email: str):
     """Get unread notifications count"""
     user = get_user_from_email(email)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        return {"unread_count": 0}
     
     notifications = notification_service.get_user_notifications(email, unread_only=True)
     return {"unread_count": len(notifications)}

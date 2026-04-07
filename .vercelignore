@@ -8,3 +8,7 @@ node_modules
 venv
 ENV
 env
+
+api/credentials.json
+credentials.json
+*.json

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header i {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .pin-box {
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            border: 3px dashed #667eea;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        .pin {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: 15px;
+            color: #667eea;
+            font-family: monospace;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        .timer {
+            font-size: 24px;
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+        }
+        
+       
+        @media screen and (max-width: 600px) {
+            .container {
+                max-width: 100% !important;
+                margin: 0 10px !important;
+            }
+            
+            .header {
+                padding: 30px 20px !important;
+            }
+            
+            .header i {
+                font-size: 40px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .header h1 {
+                font-size: 22px !important;
+            }
+            
+            .content {
+                padding: 30px 20px !important;
+            }
+            
+            .content p {
+                font-size: 14px !important;
+                line-height: 1.5 !important;
+            }
+            
+            .pin-box {
+                padding: 20px !important;
+                margin: 20px 0 !important;
+            }
+            
+            .pin {
+                font-size: 32px !important;
+                letter-spacing: 8px !important;
+            }
+            
+            .info-box {
+                padding: 15px !important;
+                margin: 20px 0 !important;
+            }
+            
+            .info-box p {
+                font-size: 13px !important;
+                margin: 3px 0 !important;
+            }
+            
+            .info-box strong {
+                font-size: 14px !important;
+            }
+            
+            .timer {
+                font-size: 20px !important;
+            }
+            
+            .footer {
+                padding: 20px !important;
+            }
+            
+            .footer p {
+                font-size: 12px !important;
+                margin: 3px 0 !important;
+            }
+        }
+
+        @media screen and (max-width: 380px) {
+            .header {
+                padding: 25px 15px !important;
+            }
+            
+            .header i {
+                font-size: 35px !important;
+            }
+            
+            .header h1 {
+                font-size: 20px !important;
+            }
+            
+            .content {
+                padding: 20px 15px !important;
+            }
+            
+            .pin-box {
+                padding: 15px !important;
+            }
+            
+            .pin {
+                font-size: 24px !important;
+                letter-spacing: 5px !important;
+            }
+            
+            .info-box {
+                padding: 12px !important;
+            }
+            
+            .info-box p {
+                font-size: 12px !important;
+            }
+            
+            .timer {
+                font-size: 18px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <i class="fas fa-envelope"></i>
+            <h1>Verify Your Email</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hello <strong>{{ user_name }}</strong>,</p>
+            
+            <p>Thank you for registering with WinPrize! Please use the following 6-digit PIN to verify your email address:</p>
+            
+            <div class="pin-box">
+                <div class="pin">{{ pin }}</div>
+            </div>
+            
+            <div class="info-box">
+                <p><i class="fas fa-clock" style="color: #ffc107; margin-right: 8px;"></i> 
+                   <strong>This PIN will expire in 20 minutes</strong></p>
+                <p><i class="fas fa-shield-alt" style="color: #28a745; margin-right: 8px;"></i> 
+                   For security, never share this PIN with anyone</p>
+                <p><i class="fas fa-redo-alt" style="color: #667eea; margin-right: 8px;"></i> 
+                   You can request a new PIN if this one expires</p>
+            </div>
+            
+            <p>If you didn't request this verification, please ignore this email.</p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 WinPrize. All rights reserved.</p>
+            <p>Lahore, Pakistan</p>
+        </div>
+    </div>
+</body>
+</html>

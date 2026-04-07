@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .draw-details {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .prize {
+            font-size: 32px;
+            color: #28a745;
+            font-weight: 700;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 New Lucky Draw!</h1>
+        </div>
+        <div class="content">
+            <p>Hello <strong>{{ user_name }}</strong>,</p>
+            <p>A new lucky draw has been added to WinPrize!</p>
+            
+            <div class="draw-details">
+                <h3>{{ draw_title }}</h3>
+                <p>💰 Entry Fee: <strong>Rs. {{ draw_fee }}</strong></p>
+                <p>🏆 Prize Pool: <strong class="prize">Rs. {{ draw_prize }}</strong></p>
+            </div>
+            
+            <p>Don't miss this chance to win big!</p>
+            <div style="text-align: center;">
+                <a href="https://winprize.onrender.com/#draws" class="button">Join Draw Now</a>
+            </div>
+        </div>
+        <div class="footer">
+            <p>© 2026 WinPrize. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

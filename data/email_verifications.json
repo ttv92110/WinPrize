@@ -1,14 +1,15 @@
 [
     {
-        "id": "99851cb3-6c8e-4386-97f9-c8c9ab36cec5",
-        "email": "arsk92110@gmail.com",
-        "name": "Arshad Ali",
-        "password": "Arshad@2020",
-        "pin": "887916",
-        "created_at": "11/03/2026T21h:01m:53s",
-        "expires_at": "11/03/2026T21h:21m:53s",
-        "verified": false,
+        "id": "ffb6a495-4843-4801-898c-96d82bc4a72e",
+        "email": "ttv92110@gmail.com",
+        "name": "Admin User",
+        "password": "admin@2020",
+        "pin": "870143",
+        "verified": true,
         "attempts": 0,
-        "user_status": "user"
-    }
+        "user_status": "staff",
+        "created_at": "06/04/2026T16h:26m:38s",
+        "expires_at": "06/04/2026T16h:46m:38s",
+        "verified_at": "06/04/2026T16h:27m:43s"
+    } 
 ]

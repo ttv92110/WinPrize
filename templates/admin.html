@@ -294,7 +294,61 @@
             </div>
         </div>
     </div>
-
+ 
+    <!-- Winner Announcement Modal -->
+    <div class="modal fade" id="winnerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-trophy me-2"></i>Announce Winner
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="winnerModalLoading" class="text-center py-4" style="display: none;">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading participants...</p>
+                    </div>
+                    
+                    <div id="winnerModalContent">
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Select a winner from the participants list below
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-users me-2"></i>Select Winner
+                            </label>
+                            <select class="form-select form-select-lg" id="winnerSelect">
+                                <option value="">-- Select a participant --</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-sticky-note me-2"></i>Notes (Optional)
+                            </label>
+                            <textarea class="form-control" id="winnerNotes" rows="2" placeholder="Add any notes about this winner..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="confirmWinner()" id="confirmWinnerBtn">
+                        <i class="fas fa-trophy me-2"></i>Announce Winner
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Winner Announcement Modal   -->
+     
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../static/js/admin.js"></script>

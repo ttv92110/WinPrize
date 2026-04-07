@@ -1,27 +1,67 @@
 async function runDraw(drawId) {
-    if (!confirm(`Are you sure you want to run this draw?`)) {
+
+    if (!currentAdmin) return;
+
+    if (!confirm("Run random draw? A winner will be selected automatically.")) {
         return;
     }
 
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Running...';
+
     try {
-        let res = await fetch(`/admin/run-draw/${drawId}`, {
-            method: "POST"
+        const res = await fetch(`/admin/run-draw/${drawId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                user_email: currentAdmin.email
+            })
         });
-        let data = await res.json();
+
+        const data = await res.json();
 
         if (data.success) {
             if (data.winner) {
-                alert(`Winner: ${data.winner.user_email}`);
+                showToast(`Winner: ${data.winner.user_name || 'Winner'} (${data.winner.user_email})`, "success");
             } else {
-                alert("No participants for this draw");
+                showToast(data.message || "No participants for this draw", "info");
             }
+            loadAdminDraws();
         } else {
-            alert(data.message || "Failed to run draw");
+            showToast(data.message || "Failed to run draw", "danger");
         }
     } catch (error) {
-        console.error("Error:", error);
-        alert("An error occurred while running the draw");
+        console.error("Error running draw:", error);
+        showToast("An error occurred", "danger");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
     }
+    // if (!confirm(`Are you sure you want to run this draw?`)) {
+    //     return;
+    // }
+
+    // try {
+    //     let res = await fetch(`/admin/run-draw/${drawId}`, {
+    //         method: "POST"
+    //     });
+    //     let data = await res.json();
+
+    //     if (data.success) {
+    //         if (data.winner) {
+    //             alert(`Winner: ${data.winner.user_email}`);
+    //         } else {
+    //             alert("No participants for this draw");
+    //         }
+    //     } else {
+    //         alert(data.message || "Failed to run draw");
+    //     }
+    // } catch (error) {
+    //     console.error("Error:", error);
+    //     alert("An error occurred while running the draw");
+    // }
 }
 
 async function createNewDraw() {

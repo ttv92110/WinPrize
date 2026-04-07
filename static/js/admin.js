@@ -1,13 +1,14 @@
 let currentAdmin = null;
 let editModal = null;
 let accessDeniedModal = null;
+let winnerModal = null;
+let currentDrawId = null;
+let currentDrawParticipants = [];
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Initialize modals
     editModal = new bootstrap.Modal(document.getElementById('editDrawModal'));
     accessDeniedModal = new bootstrap.Modal(document.getElementById('accessDeniedModal'));
-
-    // Check admin status immediately
+    winnerModal = new bootstrap.Modal(document.getElementById('winnerModal'));
     checkAdminStatus();
 });
 
@@ -19,28 +20,20 @@ async function checkAdminStatus() {
         const user = JSON.parse(localStorage.getItem("loggedUser"));
 
         if (!user) {
-            // No user logged in
             showAccessDenied("Please login first");
             return;
         }
 
-        // Verify admin status with backend
         const response = await fetch(`/admin/verify-admin?email=${encodeURIComponent(user.email)}`);
         const data = await response.json();
 
         if (data.isAdmin) {
-            // User is admin, show admin content
             currentAdmin = { email: user.email, name: user.name };
             document.getElementById("adminEmail").value = user.email;
-
-            // Hide loading, show content
             loadingState.style.display = 'none';
             adminContent.style.display = 'block';
-
-            // Load admin draws
             loadAdminDraws();
         } else {
-            // User is not admin
             showAccessDenied("You don't have admin privileges");
         }
     } catch (error) {
@@ -52,21 +45,13 @@ async function checkAdminStatus() {
 function showAccessDenied(message) {
     const loadingState = document.getElementById('loadingState');
     const adminContent = document.getElementById('adminContent');
-
-    // Hide loading and content
     loadingState.style.display = 'none';
     adminContent.style.display = 'none';
-
-    // Update modal message if needed
     const modalBody = document.querySelector('#accessDeniedModal .modal-body p:first-of-type');
     if (modalBody && message) {
         modalBody.textContent = message;
     }
-
-    // Show access denied modal
     accessDeniedModal.show();
-
-    // Redirect to home after 3 seconds
     setTimeout(() => {
         window.location.href = "/";
     }, 3000);
@@ -86,9 +71,7 @@ async function loadAdminDraws() {
         if (!res.ok) {
             if (res.status === 403) {
                 container.innerHTML = '<div class="alert alert-danger">Session expired. Please refresh and login again.</div>';
-                setTimeout(() => {
-                    logout();
-                }, 2000);
+                setTimeout(() => { logout(); }, 2000);
                 return;
             }
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -118,8 +101,7 @@ async function loadAdminDraws() {
                         </div>
                         <div class="col-md-2">
                             ${statusBadge}
-                            ${draw.status === 'awaiting' ?
-                    '<br><small class="text-warning">Needs attention!</small>' : ''}
+                            ${draw.status === 'awaiting' ? '<br><small class="text-warning">Needs attention!</small>' : ''}
                         </div>
                         <div class="col-md-3">
                             <small>Created: ${draw.created_at || 'N/A'}</small><br>
@@ -132,12 +114,15 @@ async function loadAdminDraws() {
                                     <i class="fas fa-edit"></i> Edit
                                 </button>
                                 ${draw.status === 'open' ?
-                    `<button class="btn btn-sm btn-success" onclick="runDraw('${draw.id}')">
-                                        <i class="fas fa-play"></i> Run
+                `<button class="btn btn-sm btn-success" onclick="runDrawRandom('${draw.id}')">
+                                        <i class="fas fa-random"></i> Random Winner
+                                    </button>
+                                    <button class="btn btn-sm btn-warning" onclick="openWinnerModal('${draw.id}')">
+                                        <i class="fas fa-hand-pointer"></i> Manual Winner
                                     </button>` : ''}
                                 ${draw.status === 'awaiting' ?
-                    `<button class="btn btn-sm btn-warning" onclick="runDraw('${draw.id}')">
-                                        <i class="fas fa-trophy"></i> Announce
+                `<button class="btn btn-sm btn-warning" onclick="openWinnerModal('${draw.id}')">
+                                        <i class="fas fa-trophy"></i> Announce Winner
                                     </button>` : ''}
                                 ${draw.status !== 'open' ?
                     `<button class="btn btn-sm btn-info" onclick="reopenDraw('${draw.id}')">
@@ -164,19 +149,15 @@ async function loadAdminDraws() {
 
 function getStatusBadge(status) {
     switch (status) {
-        case 'open':
-            return '<span class="badge bg-success">OPEN</span>';
-        case 'awaiting':
-            return '<span class="badge bg-warning text-dark">AWAITING ⚠️</span>';
-        case 'completed':
-            return '<span class="badge bg-primary">COMPLETED</span>';
-        case 'finished':
-            return '<span class="badge bg-secondary">FINISHED</span>';
-        default:
-            return '<span class="badge bg-secondary">UNKNOWN</span>';
+        case 'open': return '<span class="badge bg-success">OPEN</span>';
+        case 'awaiting': return '<span class="badge bg-warning text-dark">AWAITING ⚠️</span>';
+        case 'completed': return '<span class="badge bg-primary">COMPLETED</span>';
+        case 'finished': return '<span class="badge bg-secondary">FINISHED</span>';
+        default: return '<span class="badge bg-secondary">UNKNOWN</span>';
     }
 }
 
+// ========== Edit Draw Functions ==========
 async function editDraw(drawId) {
     if (!currentAdmin) return;
 
@@ -184,7 +165,6 @@ async function editDraw(drawId) {
         const res = await fetch(`/draws/${drawId}`);
         const draw = await res.json();
 
-        // Populate modal
         document.getElementById('editDrawId').value = draw.id;
         document.getElementById('editTitle').value = draw.title || '';
         document.getElementById('editDescription').value = draw.description || '';
@@ -196,12 +176,11 @@ async function editDraw(drawId) {
         document.getElementById('editVisible').value = draw.visible ? 'true' : 'false';
         document.getElementById('editAutoComplete').value = draw.auto_complete ? 'true' : 'false';
 
-        // Parse and set datetime
         if (draw.closed_at) {
             try {
                 const parts = draw.closed_at.match(/(\d+)\/(\d+)\/(\d+)T(\d+)h:(\d+)m:(\d+)s/);
                 if (parts) {
-                    const [_, day, month, year, hour, minute, second] = parts;
+                    const [_, day, month, year, hour, minute] = parts;
                     const isoString = `${year}-${month}-${day}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
                     document.getElementById('editClosedAt').value = isoString;
                 }
@@ -213,7 +192,7 @@ async function editDraw(drawId) {
         editModal.show();
     } catch (error) {
         console.error("Error loading draw for edit:", error);
-        alert("Failed to load draw details");
+        showToast("Failed to load draw details", "danger");
     }
 }
 
@@ -223,7 +202,6 @@ async function saveDrawChanges() {
     const drawId = document.getElementById('editDrawId').value;
     const closedAt = document.getElementById('editClosedAt').value;
 
-    // Format closed_at back to required format
     let formattedClosedAt = null;
     if (closedAt) {
         const date = new Date(closedAt);
@@ -257,18 +235,157 @@ async function saveDrawChanges() {
         const data = await res.json();
 
         if (data.success) {
-            alert("Draw updated successfully!");
+            showToast("Draw updated successfully!", "success");
             editModal.hide();
             loadAdminDraws();
         } else {
-            alert(data.message || "Failed to update draw");
+            showToast(data.message || "Failed to update draw", "danger");
         }
     } catch (error) {
         console.error("Error updating draw:", error);
-        alert("Failed to update draw");
+        showToast("Failed to update draw", "danger");
     }
 }
 
+// ========== Winner Announcement Functions ==========
+async function openWinnerModal(drawId) {
+    if (!currentAdmin) return;
+
+    currentDrawId = drawId;
+
+    document.getElementById('winnerSelect').innerHTML = '<option value="">-- Select a participant --</option>';
+    document.getElementById('winnerNotes').value = '';
+    document.getElementById('winnerModalContent').style.display = 'none';
+    document.getElementById('winnerModalLoading').style.display = 'block';
+
+    winnerModal.show();
+
+    try {
+        const res = await fetch(`/draws/participants/list/${drawId}?email=${encodeURIComponent(currentAdmin.email)}`);
+
+        if (!res.ok) {
+            throw new Error('Failed to load participants');
+        }
+
+        const data = await res.json();
+        currentDrawParticipants = data.participants;
+
+        document.getElementById('winnerModalLoading').style.display = 'none';
+        document.getElementById('winnerModalContent').style.display = 'block';
+
+        const select = document.getElementById('winnerSelect');
+
+        if (!data.participants || data.participants.length === 0) {
+            select.innerHTML = '<option value="">No participants found</option>';
+            document.getElementById('confirmWinnerBtn').disabled = true;
+            return;
+        }
+
+        data.participants.forEach(participant => {
+            const option = document.createElement('option');
+            option.value = participant.email;
+            option.textContent = `${participant.name} (${participant.email})`;
+            select.appendChild(option);
+        });
+
+        document.getElementById('confirmWinnerBtn').disabled = false;
+
+    } catch (error) {
+        console.error("Error loading participants:", error);
+        document.getElementById('winnerModalLoading').style.display = 'none';
+        document.getElementById('winnerModalContent').style.display = 'block';
+        document.getElementById('winnerSelect').innerHTML = '<option value="">Error loading participants</option>';
+        document.getElementById('confirmWinnerBtn').disabled = true;
+        showToast("Failed to load participants", "danger");
+    }
+}
+
+async function confirmWinner() {
+    const winnerSelect = document.getElementById('winnerSelect');
+    const winnerEmail = winnerSelect.value;
+    const notes = document.getElementById('winnerNotes').value;
+
+    if (!winnerEmail) {
+        showToast("Please select a winner", "warning");
+        return;
+    }
+
+    const confirmBtn = document.getElementById('confirmWinnerBtn');
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Announcing...';
+
+    try {
+        const res = await fetch(`/admin/update-result/${currentDrawId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                user_email: currentAdmin.email,
+                winner_email: winnerEmail,
+                notes: notes
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            showToast(`Winner announced: ${data.winner.name}`, "success");
+            winnerModal.hide();
+            loadAdminDraws();
+        } else {
+            showToast(data.message || "Failed to announce winner", "danger");
+        }
+    } catch (error) {
+        console.error("Error announcing winner:", error);
+        showToast("An error occurred", "danger");
+    } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="fas fa-trophy me-2"></i>Announce Winner';
+    }
+}
+
+async function runDrawRandom(drawId) {
+    if (!currentAdmin) return;
+
+    if (!confirm("Run random draw? A winner will be selected automatically.")) {
+        return;
+    }
+
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Running...';
+
+    try {
+        const res = await fetch(`/admin/run-draw/${drawId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                user_email: currentAdmin.email
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            if (data.winner) {
+                showToast(`Winner: ${data.winner.user_name || 'Winner'} (${data.winner.user_email})`, "success");
+            } else {
+                showToast(data.message || "No participants for this draw", "info");
+            }
+            loadAdminDraws();
+        } else {
+            showToast(data.message || "Failed to run draw", "danger");
+        }
+    } catch (error) {
+        console.error("Error running draw:", error);
+        showToast("An error occurred", "danger");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+// ========== Draw Management Functions ==========
 async function reopenDraw(drawId) {
     if (!currentAdmin) return;
 
@@ -286,14 +403,14 @@ async function reopenDraw(drawId) {
         const data = await res.json();
 
         if (data.success) {
-            alert("Draw reopened successfully!");
+            showToast("Draw reopened successfully!", "success");
             loadAdminDraws();
         } else {
-            alert(data.message || "Failed to reopen draw");
+            showToast(data.message || "Failed to reopen draw", "danger");
         }
     } catch (error) {
         console.error("Error reopening draw:", error);
-        alert("Failed to reopen draw");
+        showToast("Failed to reopen draw", "danger");
     }
 }
 
@@ -314,73 +431,14 @@ async function deleteDraw(drawId) {
         const data = await res.json();
 
         if (data.success) {
-            alert("Draw deleted successfully!");
+            showToast("Draw deleted successfully!", "success");
             loadAdminDraws();
         } else {
-            alert(data.message || "Failed to delete draw");
+            showToast(data.message || "Failed to delete draw", "danger");
         }
     } catch (error) {
         console.error("Error deleting draw:", error);
-        alert("Failed to delete draw");
-    }
-}
-
-
-async function runDraw(drawId) {
-    if (!currentAdmin) return;
-
-    const action = confirm("Do you want to manually select a winner? Click OK to enter email, Cancel for random selection.");
-
-    if (action) {
-        const winnerEmail = prompt("Enter winner email:");
-        if (winnerEmail && winnerEmail.trim() !== "") {
-            try {
-                const res = await fetch(`/admin/update-result/${drawId}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        user_email: currentAdmin.email,
-                        winner_email: winnerEmail.trim()
-                    })
-                });
-
-                const data = await res.json();
-                if (data.success) {
-                    alert(`Winner: ${data.winner.name} (${winnerEmail})`);
-                    loadAdminDraws();
-                } else {
-                    alert(data.message || "Failed to update result");
-                }
-            } catch (error) {
-                console.error("Error updating result:", error);
-                alert("An error occurred");
-            }
-        }
-    } else {
-        try {
-            const res = await fetch(`/admin/run-draw/${drawId}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    user_email: currentAdmin.email
-                })
-            });
-
-            const data = await res.json();
-            if (data.success) {
-                if (data.winner) {
-                    alert(`Winner: ${data.winner.user_name || 'Winner'} (${data.winner.user_email})`);
-                } else {
-                    alert(data.message || "No participants for this draw");
-                }
-                loadAdminDraws();
-            } else {
-                alert(data.message || "Failed to run draw");
-            }
-        } catch (error) {
-            console.error("Error running draw:", error);
-            alert("An error occurred");
-        }
+        showToast("Failed to delete draw", "danger");
     }
 }
 
@@ -396,7 +454,7 @@ async function createNewDraw() {
     const autoComplete = document.getElementById("newAutoComplete").value === 'true';
 
     if (!userPay || !timeInterval || !winnerGet) {
-        alert("Please fill all required fields");
+        showToast("Please fill all required fields", "warning");
         return;
     }
 
@@ -413,6 +471,11 @@ async function createNewDraw() {
     if (description) drawData.description = description;
     if (maxParticipants) drawData.max_participants = parseInt(maxParticipants);
 
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Creating...';
+
     try {
         const res = await fetch("/admin/create-draw", {
             method: "POST",
@@ -423,9 +486,8 @@ async function createNewDraw() {
         const data = await res.json();
 
         if (data.success) {
-            alert(data.message);
+            showToast(data.message, "success");
 
-            // Clear form
             document.getElementById("newTitle").value = "";
             document.getElementById("newUserPay").value = "";
             document.getElementById("newWinnerGet").value = "";
@@ -434,15 +496,54 @@ async function createNewDraw() {
 
             loadAdminDraws();
         } else {
-            alert(data.message || "Failed to create draw");
+            showToast(data.message || "Failed to create draw", "danger");
         }
     } catch (error) {
         console.error("Error creating draw:", error);
-        alert("Failed to create draw");
+        showToast("Failed to create draw", "danger");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
     }
 }
 
 function logout() {
     localStorage.removeItem("loggedUser");
     window.location.href = "/";
+}
+
+function showToast(message, type = 'success') {
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
+    }
+
+    const toastId = 'toast-' + Date.now();
+    const toast = document.createElement('div');
+    toast.id = toastId;
+    toast.className = `toast align-items-center text-white bg-${type} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'} me-2"></i>
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+
+    toastContainer.appendChild(toast);
+    const bsToast = new bootstrap.Toast(toast, { delay: 5000 });
+    bsToast.show();
+
+    toast.addEventListener('hidden.bs.toast', function () {
+        toast.remove();
+    });
 }

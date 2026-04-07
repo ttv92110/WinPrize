@@ -26,6 +26,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -159,6 +160,10 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
+# Google Sheets credentials
+api/credentials.json
+credentials.json
+*.json
 # Pyre type checker
 .pyre/
 

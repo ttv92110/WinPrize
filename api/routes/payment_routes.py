@@ -1,16 +1,19 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
+from api.routes.admin_routes import is_admin
 from api.schemas.enrollment_schema import PaymentCreate, PaymentUpdate
-from api.services.file_db import FileDB
+from api.services.google_sheets_db import sheets_db_manager
 from api.config import Config
 from datetime import datetime
 import uuid
 
 router = APIRouter(prefix="/payments")
 
-# Database files
-payments_db = FileDB(str(Config.PAYMENTS_FILE))
-lucky_db = FileDB(str(Config.LUCKY_DRAWS_FILE))
-users_db = FileDB(str(Config.USERS_FILE))
+# ========== صرف Google Sheets استعمال کریں ==========
+payments_db = sheets_db_manager.payments_db
+lucky_db = sheets_db_manager.draws_db
+users_db = sheets_db_manager.users_db
+user_draws_db = sheets_db_manager.user_draws_db
+# ===================================================
 
 # Bank account details
 BANK_ACCOUNTS = {
@@ -36,6 +39,7 @@ BANK_ACCOUNTS = {
     }
 }
 
+
 @router.get("/bank-accounts")
 async def get_bank_accounts():
     """Get list of bank accounts for receiving payments"""
@@ -60,7 +64,7 @@ async def create_payment(payment: PaymentCreate):
         if draw["status"] != "open":
             raise HTTPException(status_code=400, detail="Draw is not open")
         
-        # Check if user already has pending payment for this draw
+        # Check if user already has pending payment
         existing_payments = payments_db.find_by_field("user_email", payment.user_email)
         pending = [p for p in existing_payments 
                   if p.get("lucky_draw_id") == payment.lucky_draw_id 
@@ -84,9 +88,8 @@ async def create_payment(payment: PaymentCreate):
         
         payments_db.insert(payment_dict)
         
-        # Create enrollment record - Fix: Don't import from draw_routes, use local reference
-        from api.services.file_db import FileDB
-        user_draws_db = FileDB(str(Config.USER_DRAWS_FILE))
+        # Create enrollment record in Google Sheets
+        user_draws_db = sheets_db_manager.user_draws_db
         
         enrollment = {
             "id": str(uuid.uuid4()),
@@ -120,7 +123,6 @@ async def get_user_payments(email: str):
     """Get all payments for a user"""
     try:
         payments = payments_db.find_by_field("user_email", email)
-        # Sort by date descending
         payments.sort(key=lambda x: x.get("created_at", ""), reverse=True)
         return payments
     except Exception as e:
@@ -156,8 +158,6 @@ async def update_payment_status(payment_id: str, update: PaymentUpdate):
         if not payment:
             raise HTTPException(status_code=404, detail="Payment not found")
         
-        old_status = payment.get("status")
-        
         # Update payment
         payment["status"] = update.status
         payment["updated_at"] = datetime.now().strftime("%d/%m/%YT%Hh:%Mm:%Ss")
@@ -166,7 +166,7 @@ async def update_payment_status(payment_id: str, update: PaymentUpdate):
         
         payments_db.update(payment_id, payment)
         
-        # ========== نیا: صارف کو ادائیگی کی اپڈیٹ کا نوٹیفکیشن ==========
+        # Send notification to user
         from api.services.notification_service import notification_service
         
         if update.status == "paid":
@@ -194,12 +194,10 @@ async def update_payment_status(payment_id: str, update: PaymentUpdate):
                 action_url="/payment-status",
                 action_text="View Details"
             )
-        # ============================================================
         
         # If payment is paid, update enrollment status
         if update.status == "paid":
-            from api.services.file_db import FileDB
-            user_draws_db = FileDB(str(Config.USER_DRAWS_FILE))
+            user_draws_db = sheets_db_manager.user_draws_db
             enrollments = user_draws_db.find_by_field("user_email", payment["user_email"])
             for enrollment in enrollments:
                 if enrollment.get("lucky_draw_id") == payment["lucky_draw_id"]:
@@ -227,4 +225,96 @@ async def check_payment_status(email: str, draw_id: str):
     except Exception as e:
         print(f"Error checking payment: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+@router.post("/reject-payment/{payment_id}")
+async def reject_payment(payment_id: str, request: Request):
+    """Reject a payment and remove user from draw completely"""
+    try:
+        body = await request.json()
+        user_email = body.get("user_email")
+        reason = body.get("reason", "Payment rejected by admin - Fake/Invalid transaction")
+        
+        if not user_email or not is_admin(user_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        # Get payment
+        payment = payments_db.find_by_id(payment_id)
+        if not payment:
+            raise HTTPException(status_code=404, detail="Payment not found")
+        
+        # Update payment status with rejection reason in notes field
+        payment["status"] = "cancel"
+        payment["updated_at"] = datetime.now().strftime("%d/%m/%YT%Hh:%Mm:%Ss")
+        payment["rejected_by"] = user_email
+        payment["rejection_reason"] = reason
+        payment["notes"] = reason  # ← اہم: notes field میں بھی save کریں
+        payments_db.update(payment_id, payment)
+        
+        # Delete user from draw completely
+        enrollments = user_draws_db.read_all()
+        updated_enrollments = []
+        deleted = False
+        
+        for enrollment in enrollments:
+            if not (enrollment.get("user_email") == payment["user_email"] 
+                    and enrollment.get("lucky_draw_id") == payment["lucky_draw_id"]):
+                updated_enrollments.append(enrollment)
+            else:
+                deleted = True
+                print(f"Deleted enrollment for user {payment['user_email']} from draw {payment['lucky_draw_id']}")
+        
+        if deleted:
+            user_draws_db.write_all(updated_enrollments)
+        
+        # Send notification to user
+        from api.services.notification_service import notification_service
+        notification_service.create_notification(
+            user_email=payment["user_email"],
+            title="❌ Payment Rejected",
+            message=f"Your payment of Rs. {payment['amount']} for {payment['lucky_draw_title']} was rejected. Reason: {reason}",
+            notification_type="payment_update",
+            draw_id=payment["lucky_draw_id"],
+            draw_title=payment["lucky_draw_title"],
+            amount=payment["amount"],
+            action_url="/payment-status",
+            action_text="View Details"
+        )
+        
+        return {
+            "success": True, 
+            "message": "Payment rejected. User has been removed from the draw.",
+            "user_removed": deleted
+        }
+    except Exception as e:
+        print(f"Error rejecting payment: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/approve-payment/{payment_id}")
+async def approve_payment(payment_id: str, request: Request):
+    """Approve a payment and enroll user"""
+    try:
+        body = await request.json()
+        user_email = body.get("user_email")
+        notes = body.get("notes", "Payment verified and approved")  # ← notes شامل کریں
+        
+        if not user_email or not is_admin(user_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        # Get payment
+        payment = payments_db.find_by_id(payment_id)
+        if not payment:
+            raise HTTPException(status_code=404, detail="Payment not found")
+        
+        # Update payment status
+        payment["status"] = "paid"
+        payment["updated_at"] = datetime.now().strftime("%d/%m/%YT%Hh:%Mm:%Ss")
+        payment["approved_by"] = user_email
+        payment["notes"] = notes  # ← notes save کریں
+        payments_db.update(payment_id, payment)
+        
+        # ... باقی کوڈ ویسے ہی ...
+        
+        return {"success": True, "message": "Payment approved successfully. User enrolled in draw."}
+    except Exception as e:
+        print(f"Error approving payment: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))

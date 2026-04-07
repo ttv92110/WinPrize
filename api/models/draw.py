@@ -1,5 +1,4 @@
-from pydantic import BaseModel
-from datetime import datetime
+from pydantic import BaseModel 
 from typing import Optional
 
 class LuckyDraw(BaseModel):
@@ -24,61 +23,31 @@ class LuckyDrawInDB(LuckyDraw):
 '''
 Project : WinPrize/
 
-api/models/draw.py :  
-api/models/enrollment.py :   
-api/models/user.py :   
-
-api/routes/admin_routes.py : 
-api/routes/auth_routes.py :  
-api/routes/draw_routes.py :
-  
+api/models/draw.py :   
+api/models/enrollment.py :  
+api/models/user.py :  
+api/models/notification.py :  
+api/models/password_reset.py :  
+api/models/payment.py :  
+api/models/veriication.py :   
+api/routes/admin_routes.py :   
+api/routes/auth_routes.py :   
+api/routes/draw_routes.py : 
+api/routes/notifications_routes.py :  
+api/routes/password_routes.py :   
+api/routes/verification_routes.py :    
 api/schemas/draw_schemas.py : 
-api/schemas/enrollment_schemas.py :  
-api/schemas/user_schemas.py : 
-
+api/schemas/enrollment_schema.py :    
+api/schemas/user_schema.py :  
 api/services/draw_engine.py :  
 api/services/file_db.py : 
-
-api/utils/auth.py :   
-
-api/main.py :
-         
+api/services/notification_service.py :  
+api/utils/email.py : 
+api/main.py :   
 
 api/config.py:   
 api/init_data.py: have same code which you give
 api/startup.py: have same code  which you give
-
-
-data/lucky_draws.json :  
-data/user_draws.json : empty no json data, data are rquired here at will fill
-data/users.json : empty no json data, data are rquired here at will fill
  
-
-templates/admin.html :  
-templates/index.html :  
-templates/winner.html :  
-
-static/images/confrats.png :
-static/images/favicon_icon.png :
-
-
-static/js/admin_draw.js : 
-static/js/admin.js : 
-static/js/app.js :  
-static/js/auth.js : 
-static/js/draws.js : 
-static/js/enroll.js :  
-static/js/login.js :
-static/js/register.js : 
-static/js/main.js : 
-
-static/css/style.css : style still remain same, which you give this oustanding.
- 
-.env file : , style still remain same, which you give this oustanding.
-
-requirement.txt :  style still remain same, which you give this oustanding.
-
-vercel.json :  style still remain same, which you give this oustanding.
-
-
+other file are also there.
 '''
