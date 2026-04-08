@@ -796,6 +796,37 @@ AOS for scroll animations
 
 All contributors and users of WinPrize 
 
+<small align="center">
+🎯 WinPrize Project Description
+Aspect	Description
+Problem:	Traditional lucky draw platforms lack transparency, real-time tracking, and secure payment verification, making users hesitant to participate online.
+Implement:	Built a full-stack Django application with Google Sheets integration, email notifications, admin panel, payment verification system, and real-time winner announcements.
+Solution:	A secure, transparent, and user-friendly lucky draw platform where users can participate with minimal entry fees, track payments, receive instant notifications, and winners are announced fairly.
+
+📋 Detailed Feature Breakdown
+Feature	Description
+
+User Authentication:	Email verification with 6-digit PIN (20 min expiry), secure login, password reset via email
+Lucky Draws:	Multiple time intervals (1 hour to 1 year), auto status updates, participant counting, real-time countdown
+Payment System:	Multiple bank options (Easypaisa, Jazzcash, Allied Bank, Meezan Bank), transaction ID tracking, admin approval/rejection with reason
+Winner Announcement:	Random or manual selection, dropdown with participants list, automated email notifications to all participants
+Notifications:	In-app notification system with unread count badge, email notifications for all events
+Admin Panel:	Full CRUD operations on draws, payment verification, winner management, user status management
+Data Storage:	Google Sheets integration for persistent storage, no database required, accessible from anywhere
+Email System:	Welcome emails, verification PINs, password reset links, draw result notifications, payment status updates
+Security:	Admin-only routes, email verification, secure password handling, Google Sheets credentials via environment variables
+Deployment:	Successfully deployed on Vercel/Render with serverless functions, environment variables for sensitive data
+
+🏆 Key Achievements
+
+Achievement	Description
+Zero Database Cost:	Entire application runs on Google Sheets as database
+Real-time Updates:  Instant notifications and email alerts for all user actions
+User Trust;	Transparent winner selection with participant lists
+Scalable:	Serverless architecture handles any number of users
+Mobile Ready:	Fully responsive design works on all devices
+</small>
+
 <div align="center">
 ⭐ If you like this project, please give it a star on GitHub! ⭐
 Made with ❤️ in Pakistan
