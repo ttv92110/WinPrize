@@ -1,20 +1,95 @@
 🏆 WinPrize - Lucky Draw Platform
+
+>> login screen Page
+<img width="1440" height="842" alt="login screen" src="https://github.com/user-attachments/assets/f2aceb59-5e00-48d1-bf1d-8b630083311b" />
+
+>> landing screen Page
+<img width="1439" height="842" alt="landing screen" src="https://github.com/user-attachments/assets/71febfb9-9695-45a7-b99c-29d8bdef0038" />
+
+draw screen
+<img width="1440" height="841" alt="draw screen" src="https://github.com/user-attachments/assets/fb4bc522-fbab-4067-a240-9e7d0f1783e7" />
+
+>> how is it work
+<img width="1440" height="840" alt="how is it work" src="https://github.com/user-attachments/assets/ff952daf-ee1d-4d25-b0b6-e401ea80d9e9" />
+
+>> footer screen Page
+<img width="1440" height="830" alt="footer screen" src="https://github.com/user-attachments/assets/729c9f72-bfd4-4dc4-acf6-5de0aa5fd5aa" />
+
+>> addmin screen
+<img width="1440" height="804" alt="addmin screen" src="https://github.com/user-attachments/assets/45163eda-c84a-4d69-b10c-458c8cb423de" />
+
+>> forgot screen Page
+<img width="1440" height="841" alt="forgot screen" src="https://github.com/user-attachments/assets/abf3661b-4ac1-4e04-b3b7-89bc7c0e1b6c" />
+
+>> forgot password reset screen Page
+<img width="1440" height="824" alt="forgot password reset screen" src="https://github.com/user-attachments/assets/1259c3e8-528f-4b76-83e6-cd48818aa59e" /> 
+
+>> edit screen for Lucky draw Page
+<img width="1439" height="838" alt="edit screen for Lucky draw" src="https://github.com/user-attachments/assets/45082d2f-9efb-4a3e-90ab-e1387ea521b6" /> 
+
+>> database sheet Page
+<img width="1387" height="569" alt="database sheet" src="https://github.com/user-attachments/assets/ade11923-bb8c-40d9-8f61-ea9b48961390" />
+ 
+>> winner screen Page
+<img width="1439" height="839" alt="winner screen" src="https://github.com/user-attachments/assets/7b71e03a-dee1-4eb1-91e0-d6c741864d33" />
+
+>> submit screen Page
+<img width="1440" height="518" alt="submit screen" src="https://github.com/user-attachments/assets/fa530acc-b0b3-4279-9a58-0077ed08e452" />
+
+>> register screen Page
+<img width="1439" height="836" alt="register screen" src="https://github.com/user-attachments/assets/d8f6579e-d7e4-4178-888c-dfa94b1732a6" />
+
+>> Pin Verify Page
+<img width="1440" height="841" alt="Pin Verify" src="https://github.com/user-attachments/assets/1df61def-0242-414b-8a5d-34c31978a5dc" />
+
+>> payment-status
+<img width="1440" height="839" alt="payment-status" src="https://github.com/user-attachments/assets/0cbd4d8f-3625-432a-9329-c7227f9d3798" />
+
+>> payment confirm
+<img width="1438" height="839" alt="payment confirm" src="https://github.com/user-attachments/assets/f16761cd-a4cb-4c5f-b681-da41804c2f96" />
+
+>> notification screen Page
+<img width="1439" height="842" alt="notification screen" src="https://github.com/user-attachments/assets/5237cc8b-152d-4c4d-9272-6db16728ea1a" /> 
+
+-------------------------------------------------------------  Emails sending template -----------------------------------------------------------------------
+
+>> Email verify
+<img width="1204" height="641" alt="email verify" src="https://github.com/user-attachments/assets/8f2e68a7-6716-47de-9cc2-42ca678f701a" />
+
+>> winner email
+<img width="1247" height="659" alt="winner email" src="https://github.com/user-attachments/assets/d5fe4736-dc73-478e-9ff3-f1a17f1e09d3" />
+
+>> reset Password email
+<img width="1208" height="667" alt="reset Password" src="https://github.com/user-attachments/assets/6991900f-cd6e-4138-811d-6fa4c475f755" />
+
+>> payment approved email
+<img width="1192" height="678" alt="payment approved email" src="https://github.com/user-attachments/assets/1225a7ca-8f69-4ab5-8977-211ed605f458" />
+
+>> payment reject email
+<img width="1211" height="598" alt="payment reject email" src="https://github.com/user-attachments/assets/62bd500f-55d4-4925-ad94-7a1d76c1aea0" />
+
+>> new draw notification email
+<img width="1202" height="666" alt="new draw notification email" src="https://github.com/user-attachments/assets/9d0ad29b-a679-4597-b196-e66e90c5afbc" />
+
+-------------------------------------------------------------  Describe -----------------------------------------------------------------------
 https://img.freepik.com/free-vector/winner-concept-illustration_114360-3091.jpg
 
 <div align="center">
-🎯 Turn 1 Rupee into Thousands!
+🎯 Turn 1 Rupee into Thousands! 
 
-https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi
+ 
+<img width="100" height="50" alt="FASTAPI" src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi" />
 
-https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
+<img width="100" height="50" alt="Bootstrap" src="https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white" />
 
-https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
+<img width="100" height="50" alt="JavaScript" src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
 
-https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white
+<img width="100" height="50" alt="Vercel" src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" />
 
-https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
+<img width="100" height="50" alt="Python" src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
 
-https://img.shields.io/badge/Jinja-B41717?style=for-the-badge&logo=jinja&logoColor=white
+<img width="100" height="50" alt="Jinja" src="https://img.shields.io/badge/Jinja-B41717?style=for-the-badge&logo=jinja&logoColor=white" />
+
 
 </div>
 📋 Table of Contents
@@ -138,39 +213,39 @@ WinPrize is a modern, secure, and feature-rich lucky draw platform built with Fa
 
 📸 Screenshots
 🏠 Home Page
-https://img.freepik.com/free-vector/winner-concept-illustration_114360-3091.jpg
+<img width="1440" height="840" alt="how is it work" src="https://img.freepik.com/free-vector/winner-concept-illustration_114360-3091.jpg" />
 Modern hero section with animated elements and platform stats
 
 🎯 Active Draws
-https://img.freepik.com/free-vector/lottery-winner-concept-illustration_114360-2251.jpg
+<img width="1440" height="840" alt="how is it work" src="https://img.freepik.com/free-vector/lottery-winner-concept-illustration_114360-2251.jpg" />
 Beautifully designed draw cards with live countdown timers
 
 🔐 Login Modal
-https://img.freepik.com/free-vector/login-concept-illustration_114360-739.jpg
+<img width="1440" height="840" alt="how is it work" src="https://img.freepik.com/free-vector/login-concept-illustration_114360-739.jpg" />
 Secure login with password visibility toggle
 
-📝 Registration with Email Verification
-https://img.freepik.com/free-vector/sign-up-concept-illustration_114360-7885.jpg
+📝 Registration with Email Verification 
+<img width="1440" height="840" alt="how is it work" src="https://img.freepik.com/free-vector/sign-up-concept-illustration_114360-7885.jpg" />
 *Complete registration with 6-digit PIN verification*
 
-✅ PIN Verification
-https://img.freepik.com/free-vector/two-factor-authentication-illustration_23-2148624525.jpg
+✅ PIN Verification 
+<img width="1440" height="840" alt="how is it work" src="https://img.freepik.com/free-vector/two-factor-authentication-illustration_23-2148624525.jpg" />
 *Enter 6-digit PIN sent to email (expires in 20 minutes)*
 
-💳 Payment Form
-https://img.freepik.com/free-vector/online-payments-concept-illustration_114360-2651.jpg
+💳 Payment Form 
+<img width="1440" height="840" alt="how is it work" src="https://img.freepik.com/free-vector/online-payments-concept-illustration_114360-2651.jpg" />
 Complete payment details with bank selection
 
-📊 Payment Status Page
-https://img.freepik.com/free-vector/payment-information-concept-illustration_114360-2782.jpg
+📊 Payment Status Page 
+<img width="1440" height="840" alt="how is it work" src="https://img.freepik.com/free-vector/payment-information-concept-illustration_114360-2782.jpg" />
 Track all payments with status filters and rejection reasons
 
-👑 Admin Panel
-https://img.freepik.com/free-vector/admin-panel-concept-illustration_114360-2498.jpg
+👑 Admin Panel 
+<img width="1440" height="840" alt="how is it work" src="https://img.freepik.com/free-vector/admin-panel-concept-illustration_114360-2498.jpg" />
 Complete draw and payment management
 
 🏆 Winners Page
-https://img.freepik.com/free-vector/winner-ceremony-concept-illustration_114360-2528.jpg
+<img width="1440" height="840" alt="how is it work" src="https://img.freepik.com/free-vector/winner-ceremony-concept-illustration_114360-2528.jpg" />
 View all winners with masked emails for privacy
 
 🏗️ Architecture
@@ -217,8 +292,8 @@ text
 
 Test Credentials
 Role	Email	Password
-👑 Admin	admin@example.com	admin123
-👤 User	user@example.com	user123
+👑 Admin	admin@example.com	pass:xxxxxxx
+👤 User	user@example.com	pass: xxxxxx
 💻 Tech Stack
 Backend
 FastAPI - Modern Python web framework
