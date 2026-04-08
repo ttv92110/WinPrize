@@ -5,11 +5,12 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update navigation based on login status
     let loginBtn = document.getElementById("loginBtn");
     let registerBtn = document.getElementById("registerBtn");
-    let userMenu = document.getElementById("userMenu");
+    let userMenu = document.getElementById("userMenu"); 
 
     if (user) {
         if (loginBtn) loginBtn.style.display = "none";
         if (registerBtn) registerBtn.style.display = "none";
+
 
         if (userMenu) {
             userMenu.innerHTML = `

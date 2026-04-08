@@ -9,10 +9,11 @@ function updateUserMenu() {
 
         // Build dropdown menu items
         let dropdownItems = `
-            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
-            <li><a class="dropdown-item" href="/my-draws"><i class="fas fa-ticket-alt me-2"></i>My Draws</a></li>
+            <!-- <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li> -->
+            <li><a class="dropdown-item" href="/#draws"><i class="fas fa-ticket-alt me-2"></i>My Draws</a></li>
             <li><a class="dropdown-item" href="/notifications"><i class="fas fa-bell me-2"></i>Notifications</a></li>
             <li><a class="dropdown-item" href="/winner"><i class="fas fa-trophy me-2"></i>Winners</a></li>
+            <li><a class="dropdown-item" href="/payment-status"><i class="fas fa-money me-2"></i>Payment Status</a></li>
         `;
 
         // Add Admin link if user is staff
@@ -94,8 +95,7 @@ async function updateNotificationBadge() {
 }
 // ===================================================
 
-// Modify login function to store user_status
-// Modify login function to store user_status
+// Modify login function to store user_status 
 async function login() {
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
@@ -176,8 +176,7 @@ async function login() {
     }
 }
 
-// Forgot password function
-// Forgot password function
+// Forgot password function 
 async function forgotPassword() {
     const email = document.getElementById("forgotEmail").value;
 
@@ -241,8 +240,7 @@ async function forgotPassword() {
     }
 }
 
-// Signup function with email verification
-// Signup function with email verification
+// Signup function with email verification 
 async function signup() {
     const name = document.getElementById("registerName").value;
     const email = document.getElementById("registerEmail").value;
