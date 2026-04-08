@@ -1,11 +1,7 @@
 from api.config import Config
 from api.services.file_db import FileDB
 
-class UnifiedDB:
-    """
-    Unified Database - Can switch between FileDB and Google Sheets
-    without changing any existing code
-    """
+class UnifiedDB: 
     
     def __init__(self, file_db: FileDB, sheets_db):
         self.file_db = file_db
@@ -49,3 +45,4 @@ class UnifiedDB:
             all_data = self.sheets_db.read_all()
             self.file_db.write_all(all_data)
             print(f"✅ Synced {len(all_data)} records to FileDB")
+

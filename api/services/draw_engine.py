@@ -1,7 +1,8 @@
 import random
-from api.services.google_sheets_db import sheets_db_manager
-from api.config import Config
-from datetime import datetime
+from api.services.google_sheets_db import sheets_db_manager 
+import asyncio
+from api.utils.email import EmailService
+
 
 def run_draw(draw_id: str):
     # Get all entries for this draw
@@ -70,34 +71,45 @@ def run_draw(draw_id: str):
                 action_text="View Results"
             )
     
-    # Add name to winner object before returning
-    winner["user_name"] = winner_name
-    winner["winner_name"] = winner_name
-        
-    # ========== Email بھیجیں تمام شرکاء کو ==========
-    from api.utils.email import EmailService
+    # ========== Email بھیجیں (Synchronous way) ==========
     email_service = EmailService()
     
-    # Winner کو email
-    import asyncio
-    asyncio.create_task(email_service.send_draw_result_notification(
-        to_email=winner["user_email"],
-        user_name=winner_name,
-        draw_title=draw_title,
-        is_winner=True,
-        prize_amount=draw['winner_get']
-    ))
+    # Helper function to send email synchronously
+    def send_email_sync(to_email, user_name, draw_title, is_winner, prize_amount=0):
+        try:
+            # Create new event loop for this thread
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(
+                    email_service.send_draw_result_notification(
+                        to_email=to_email,
+                        user_name=user_name,
+                        draw_title=draw_title,
+                        is_winner=is_winner,
+                        prize_amount=prize_amount
+                    )
+                )
+            finally:
+                loop.close()
+        except Exception as e:
+            print(f"Error sending email to {to_email}: {str(e)}")
     
-    # Losers کو email
+    # Winner ko email (synchronously)
+    send_email_sync(winner["user_email"], winner_name, draw_title, True, draw['winner_get'])
+    
+    # Losers ko email (synchronously)
     for entry in draw_entries:
         if entry["user_email"] != winner["user_email"]:
             user_info = sheets_db_manager.users_db.find_by_field("email", entry["user_email"])
             user_name = user_info[0].get("name", "User") if user_info else "User"
-            asyncio.create_task(email_service.send_draw_result_notification(
-                to_email=entry["user_email"],
-                user_name=user_name,
-                draw_title=draw_title,
-                is_winner=False
-            ))
+            send_email_sync(entry["user_email"], user_name, draw_title, False)
+    # ===================================================
+    
+    email_service.send_draw_result_notification_sync(winner["user_email"], winner_name, draw_title, True, draw['winner_get'])
+    # Add name to winner object before returning
+    winner["user_name"] = winner_name
+    winner["winner_name"] = winner_name
     
     return winner
+

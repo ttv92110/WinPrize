@@ -5,12 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update navigation based on login status
     let loginBtn = document.getElementById("loginBtn");
     let registerBtn = document.getElementById("registerBtn");
-    let userMenu = document.getElementById("userMenu"); 
+    let userMenu = document.getElementById("userMenu");
 
     if (user) {
         if (loginBtn) loginBtn.style.display = "none";
         if (registerBtn) registerBtn.style.display = "none";
-
 
         if (userMenu) {
             userMenu.innerHTML = `
@@ -40,15 +39,19 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
         }
 
+        // ========== اہم تبدیلی: ہر پیج پر notification badge اپڈیٹ کریں ==========
         // Show notification bell
         const notificationBell = document.getElementById('notificationBell');
-        if (notificationBell) notificationBell.style.display = 'inline-block';
+        if (notificationBell) {
+            notificationBell.style.display = 'inline-block';
+        }
 
         // Update notification badge immediately
         updateNotificationBadge();
 
         // Check for new notifications every 30 seconds
         setInterval(updateNotificationBadge, 30000);
+        // =================================================================
 
     } else {
         if (loginBtn) loginBtn.style.display = "inline-block";
@@ -74,26 +77,6 @@ function updateAdminNavLink() {
     }
 }
 
-// Logout function
-function logout() {
-    localStorage.removeItem("loggedUser");
-    window.location.href = "/";
-}
-
-// Show toast function
-function showToast(message, type = 'success') {
-    const toast = document.getElementById('successToast');
-    const toastMessage = document.getElementById('toastMessage');
-    if (toast) {
-        toastMessage.textContent = message;
-        toast.className = `toast align-items-center text-white bg-${type} border-0`;
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
-    } else {
-        alert(message);
-    }
-}
-
 // ========== Notification Bell Functions ==========
 async function updateNotificationBadge() {
     const user = JSON.parse(localStorage.getItem("loggedUser"));
@@ -114,6 +97,7 @@ async function updateNotificationBadge() {
         if (data.unread_count > 0) {
             badge.textContent = data.unread_count;
             badge.style.display = 'inline';
+            badge.style.backgroundColor = '#dc3545';  // Red color
             badge.style.animation = 'pulse 1s infinite';
         } else {
             badge.style.display = 'none';
@@ -123,8 +107,29 @@ async function updateNotificationBadge() {
         console.error("Error updating notification badge:", error);
     }
 }
+// ===================================================
 
-// Call updateNotificationBadge when page loads and after login
+// Logout function
+function logout() {
+    localStorage.removeItem("loggedUser");
+    window.location.href = "/";
+}
+
+// Show toast function
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('successToast');
+    const toastMessage = document.getElementById('toastMessage');
+    if (toast) {
+        toastMessage.textContent = message;
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+    } else {
+        alert(message);
+    }
+}
+
+// Make updateNotificationBadge available globally
 window.updateNotificationBadge = updateNotificationBadge;
  
 // Show/hide admin nav link based on user status
@@ -182,9 +187,3 @@ function logout() {
     updateAdminNavLink(); // Add this line
     showToast("Logged out successfully", "info");
 }
-
-// Logout function
-window.logout = function () {
-    localStorage.removeItem("loggedUser");
-    window.location.href = "/";
-};

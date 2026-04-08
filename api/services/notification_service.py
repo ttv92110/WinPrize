@@ -10,13 +10,12 @@ class NotificationService:
         self.users_db = sheets_db_manager.users_db
     
     def create_notification(self, user_email: str, title: str, message: str, 
-                           notification_type: str, draw_id: Optional[str] = None,
-                           draw_title: Optional[str] = None, amount: Optional[int] = None,
-                           action_url: Optional[str] = None, action_text: str = "View Draw",
-                           expires_in_days: int = 7):
+                       notification_type: str, draw_id: Optional[str] = None,
+                       draw_title: Optional[str] = None, amount: Optional[int] = None,
+                       action_url: Optional[str] = None, action_text: str = "View Draw",
+                       expires_in_days: int = 7):
         """Create a new notification for a user"""
         try:
-            # Check if user exists
             users = self.users_db.find_by_field("email", user_email)
             if not users:
                 print(f"User {user_email} not found, cannot send notification")
@@ -32,14 +31,15 @@ class NotificationService:
                 "draw_id": draw_id,
                 "draw_title": draw_title,
                 "amount": amount,
-                "read": False,
+                "read": False,  # ← boolean, string نہیں
                 "created_at": datetime.now().strftime("%d/%m/%YT%Hh:%Mm:%Ss"),
                 "expires_at": (datetime.now() + timedelta(days=expires_in_days)).strftime("%d/%m/%YT%Hh:%Mm:%Ss"),
                 "action_url": action_url or (f"/confirm?draw={draw_id}" if draw_id else None),
                 "action_text": action_text
             }
             
-            self.notifications_db.insert(notification) 
+            self.notifications_db.insert(notification)
+            print(f"Notification created for {user_email}: {title}")
             return notification
         except Exception as e:
             print(f"Error creating notification: {str(e)}")
@@ -77,7 +77,7 @@ class NotificationService:
             print(f"Error broadcasting notification: {str(e)}")
             return 0
     
-    def get_user_notifications(self, user_email: str, unread_only: bool = False, limit: int = 50):
+    def get_user_notifications(self, user_email: str, unread_only: bool = False, limit: int = 1000):
         """Get notifications for a specific user"""
         try:
             all_notifications = self.notifications_db.read_all()
@@ -111,23 +111,44 @@ class NotificationService:
         """Mark a notification as read"""
         try:
             notification = self.notifications_db.find_by_id(notification_id)
-            if not notification or notification.get("user_email") != user_email:
+            if not notification: 
                 return False
             
-            self.notifications_db.update(notification_id, {"read": True})
-            return True
+            if notification.get("user_email") != user_email: 
+                return False
+            
+            # Update the read status to True (boolean)
+            result = self.notifications_db.update(notification_id, {"read": True})
+            
+            if result: 
+                return True
+            else: 
+                return False
         except Exception as e:
             print(f"Error marking notification as read: {str(e)}")
             return False
-    
+        
     def mark_all_as_read(self, user_email: str) -> int:
         """Mark all notifications as read for a user"""
         try:
-            notifications = self.get_user_notifications(user_email, unread_only=True)
+            # Get ALL notifications for this user (not just unread)
+            all_notifications = self.get_user_notifications(user_email, unread_only=False, limit=1000)
+            
             count = 0
-            for n in notifications:
-                if self.mark_as_read(n["id"], user_email):
-                    count += 1
+            for n in all_notifications:
+                # Check if notification is unread
+                read_val = n.get("read", False)
+                is_read = False
+                
+                if isinstance(read_val, str):
+                    is_read = read_val.lower() == "true"
+                else:
+                    is_read = read_val
+                
+                # If unread, mark as read
+                if not is_read:
+                    if self.mark_as_read(n["id"], user_email):
+                        count += 1 
             return count
         except Exception as e:
             print(f"Error marking all as read: {str(e)}")

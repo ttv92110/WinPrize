@@ -1,9 +1,9 @@
 [
     {
         "id": "ffb6a495-4843-4801-898c-96d82bc4a72e",
-        "email": "ttv92110@gmail.com",
-        "name": "Admin User",
-        "password": "admin@2020",
+        "email": "",
+        "name": "Admin Staff",
+        "password": "",
         "pin": "870143",
         "verified": true,
         "attempts": 0,

@@ -15,18 +15,50 @@ def get_user_from_email(email: str):
     return users[0] if users else None
 
 @router.get("/{email}")
-async def get_notifications(email: str, unread_only: bool = False, limit: int = 50):
+async def get_notifications(email: str, unread_only: bool = False, limit: int = 1000):
     """Get notifications for a user"""
     user = get_user_from_email(email)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
     notifications = notification_service.get_user_notifications(email, unread_only, limit)
+    
+    # Convert string "False" to boolean False for each notification
+    for n in notifications:
+        if isinstance(n.get("read"), str):
+            n["read"] = n["read"].lower() == "true"
+    
     return {
         "success": True,
         "notifications": notifications,
         "unread_count": len([n for n in notifications if not n.get("read", False)])
     }
+
+@router.get("/count/{email}")
+async def get_unread_count(email: str):
+    """Get unread notifications count"""
+    user = get_user_from_email(email)
+    if not user:
+        return {"unread_count": 0}
+    
+    # Get all notifications (not just unread)
+    all_notifications = notification_service.get_user_notifications(email, unread_only=False, limit=1000)
+    
+    # Count unread notifications
+    unread_count = 0
+    for n in all_notifications:
+        read_val = n.get("read", False)
+        
+        # Handle both string and boolean
+        if isinstance(read_val, str):
+            if read_val.lower() == "false":
+                unread_count += 1
+        elif read_val is False:
+            unread_count += 1
+    
+    print(f"📊 Unread count for {email}: {unread_count} (total notifications: {len(all_notifications)})")
+    
+    return {"unread_count": unread_count}
 
 @router.post("/mark-read/{notification_id}")
 async def mark_notification_read(notification_id: str, request: Request):
@@ -53,8 +85,24 @@ async def mark_all_read(email: str):
     user = get_user_from_email(email)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+     
+    all_notifications = notification_service.get_user_notifications(email, unread_only=False, limit=1000)
     
-    count = notification_service.mark_all_as_read(email)
+    count = 0
+    for n in all_notifications: 
+        read_val = n.get("read", False)
+        is_read = False
+        
+        if isinstance(read_val, str):
+            is_read = read_val.lower() == "true"
+        else:
+            is_read = read_val
+         
+        if not is_read:
+            success = notification_service.mark_as_read(n["id"], email)
+            if success:
+                count += 1
+    
     return {"success": True, "message": f"{count} notifications marked as read"}
 
 @router.delete("/{notification_id}")
@@ -67,8 +115,7 @@ async def delete_notification(notification_id: str, request: Request):
         user = get_user_from_email(email)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        
-        # Soft delete by marking as read
+         
         success = notification_service.mark_as_read(notification_id, email)
         if success:
             return {"success": True, "message": "Notification deleted"}
@@ -76,13 +123,4 @@ async def delete_notification(notification_id: str, request: Request):
             raise HTTPException(status_code=404, detail="Notification not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-@router.get("/count/{email}")
-async def get_unread_count(email: str):
-    """Get unread notifications count"""
-    user = get_user_from_email(email)
-    if not user:
-        return {"unread_count": 0}
-    
-    notifications = notification_service.get_user_notifications(email, unread_only=True)
-    return {"unread_count": len(notifications)}
+ 

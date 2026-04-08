@@ -1,9 +1,9 @@
 [
     {
         "id": "ffb6a495-4843-4801-898c-96d82bc4a72e",
-        "name": "Admin User",
-        "email": "ttv92110@gmail.com",
-        "password": "admin@2020",
+        "name": "Admin Staff",
+        "email": "",
+        "password": "",
         "user_status": "staff",
         "email_verified": true,
         "verified_at": "11/03/2026T17h:03m:18s"

@@ -1,13 +1,37 @@
 async function loadDraws() {
+    const container = document.getElementById("drawContainer");
+    if (!container) return;
+
+    // ========== LOADER HTML ==========
+    container.innerHTML = `
+        <div class="draw-loader-container">
+            <div class="draw-loader">
+                <div class="loader-ring">
+                    <div class="loader-ring-inner"></div>
+                </div>
+                <div class="loader-trophy">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="loader-text">
+                    <span>L</span><span>o</span><span>a</span><span>d</span><span>i</span><span>n</span><span>g</span>
+                    <span> </span>
+                    <span>D</span><span>r</span><span>a</span><span>w</span><span>s</span>
+                    <span>.</span><span>.</span><span>.</span>
+                </div>
+                <div class="loader-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    // =================================
+
     try {
         let res = await fetch("/draws/");
         let draws = await res.json();
-        let container = document.getElementById("drawContainer");
         let user = JSON.parse(localStorage.getItem("loggedUser"));
-
-        if (!container) return;
-
-        container.innerHTML = "";
 
         if (draws.length === 0) {
             container.innerHTML = '<div class="col-12 text-center"><h3>No active draws available</h3></div>';
@@ -42,29 +66,30 @@ async function loadDraws() {
             }
         }
 
+        // Clear container and build cards
+        container.innerHTML = "";
+
         for (let i = 0; i < draws.length; i++) {
             const draw = draws[i];
             if (draw.visible) {
                 let timeIcon = draw.time_interval === 'day' ? 'fa-sun' :
                     draw.time_interval === 'week' ? 'fa-calendar-week' : 'fa-calendar-alt';
 
-                // Get accurate time left
                 let timeLeft = "Loading...";
                 let timeStatus = "";
-                let resultMessage = "";  // ← نتیجہ کا میسج یہاں ڈیفائن کیا
+                let resultMessage = "";
 
                 try {
                     const timeRes = await fetch(`/draws/time-left/${draw.id}`);
                     const timeData = await timeRes.json();
                     timeLeft = timeData.time_left;
                     timeStatus = timeData.status || draw.status;
-                    resultMessage = timeData.result_message || "";  // ← API سے میسج لیا
+                    resultMessage = timeData.result_message || "";
                 } catch (error) {
                     console.error("Error fetching time left:", error);
                     timeLeft = "Unknown";
                 }
 
-                // Determine badge color and text
                 let badgeClass = 'bg-success';
                 let badgeIcon = 'fa-bolt';
                 let badgeText = 'LIVE';
@@ -84,8 +109,6 @@ async function loadDraws() {
                 }
 
                 const participantsCount = participantCounts[draw.id] || 0;
-
-                // Check if user has joined this specific draw
                 const userJoined = joinedDraws[draw.id];
 
                 let card = `<div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="${i * 100}">
@@ -132,7 +155,6 @@ async function loadDraws() {
                                 </div>
                             </div>`;
 
-                // ========== اہم حصہ: Result Message یہاں شامل کیا گیا ہے ==========
                 if (resultMessage) {
                     card += `<div class="text-center mb-3">
                         <small class="text-warning fw-bold">
@@ -141,11 +163,9 @@ async function loadDraws() {
                         </small>
                     </div>`;
                 }
-                // =================================================================
 
                 if (draw.status === 'completed') {
-                    card += `<button onclick="viewResult('${draw.id}')" 
-                                    class="btn-result">
+                    card += `<button onclick="viewResult('${draw.id}')" class="btn-result">
                                 <i class="fas fa-trophy me-2"></i>
                                 View Result
                             </button>`;
@@ -157,7 +177,6 @@ async function loadDraws() {
                                 </span>
                             </div>`;
                 } else if (userJoined) {
-                    // User has joined this draw
                     const status = userJoined.status === "win" ? "You won! 🎉" :
                         userJoined.status === "loss" ? "You lost 😢" :
                             "You've joined";
@@ -168,7 +187,6 @@ async function loadDraws() {
                                 </span>
                             </div>`;
                 } else if (draw.status === 'open') {
-                    // Draw is open and user hasn't joined
                     card += `<button onclick="joinDraw('${draw.id}', ${draw.user_pay})" 
                                     class="btn-join ${!isLoggedIn() ? 'disabled' : ''}"
                                     ${!isLoggedIn() ? 'disabled' : ''}>
@@ -192,7 +210,6 @@ async function loadDraws() {
         }
     } catch (error) {
         console.error("Error loading draws:", error);
-        // Show error message to user
         const container = document.getElementById("drawContainer");
         if (container) {
             container.innerHTML = '<div class="col-12 text-center"><div class="alert alert-danger">Error loading draws. Please refresh the page.</div></div>';

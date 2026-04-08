@@ -227,7 +227,6 @@ class GoogleSheetsDB:
         except Exception as e:
             print(f"Error writing to Google Sheets: {str(e)}")
 
-
 # Database instances
 class GoogleSheetsDBManager:
     def __init__(self):
@@ -238,7 +237,6 @@ class GoogleSheetsDBManager:
         self.notifications_db = GoogleSheetsDB("WinPrize_Notifications", "notifications")
         self.verifications_db = GoogleSheetsDB("WinPrize_Verifications", "verifications")
         self.password_resets_db = GoogleSheetsDB("WinPrize_PasswordResets", "password_resets")
-
 
 # Create global instance
 sheets_db_manager = GoogleSheetsDBManager()

@@ -2,7 +2,6 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: 'Poppins', Arial, sans-serif;
@@ -19,18 +18,28 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         .header {
-            background: linear-gradient(135deg, #6c757d, #495057);
+            background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
             padding: 40px 30px;
             text-align: center;
         }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
         .content {
             padding: 40px 30px;
-            text-align: center;
+        }
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
         }
         .button {
             display: inline-block;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: #28a745;
             color: white;
             text-decoration: none;
             padding: 12px 30px;
@@ -50,15 +59,20 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Draw Result Announced</h1>
+            <h1>✅ Payment Approved!</h1>
         </div>
         <div class="content">
             <p>Hello <strong>{{ user_name }}</strong>,</p>
-            <p>The winner for <strong>{{ draw_title }}</strong> has been announced.</p>
-            <p>Unfortunately, you didn't win this time.</p>
-            <p>Don't worry! More draws are coming soon. Better luck next time! 🍀</p>
+            <p>Your payment for <strong>{{ draw_title }}</strong> has been approved!</p>
+            
+            <div class="success-box">
+                <p><strong>Amount Paid:</strong> Rs. {{ amount }}</p>
+                <p><strong>Status:</strong> Approved ✅</p>
+            </div>
+            
+            <p>You are now successfully enrolled in the draw. Good luck!</p>
             <div style="text-align: center;">
-                <a href="https://winprize.vercel.app/#draws" class="button">View Active Draws</a>
+                <a href="https://winprize.vercel.app/draws" class="button">View Draws</a>
             </div>
         </div>
         <div class="footer">

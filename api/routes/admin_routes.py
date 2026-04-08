@@ -227,6 +227,7 @@ async def update_draw_result(draw_id: str, request: Request):
         body = await request.json()
         user_email = body.get("user_email")
         winner_email = body.get("winner_email")
+        notes = body.get("notes", "")
         
         if not user_email or not is_admin(user_email):
             raise HTTPException(status_code=403, detail="Admin access required")
@@ -241,15 +242,22 @@ async def update_draw_result(draw_id: str, request: Request):
         if user_info and len(user_info) > 0:
             winner_name = user_info[0].get("name", "Anonymous User")
         
+        # Get draw title
+        draw_title = draw.get("title", "Lucky Draw")
+        draw_prize = draw.get("winner_get", 0)
+        
         # Update all entries for this draw
         all_entries = user_draws_db.read_all()
         updated = False
+        participants_emails = []  # Store all participant emails for email sending
+        
         for i, entry in enumerate(all_entries):
             if entry.get("lucky_draw_id") == draw_id:
+                participants_emails.append(entry.get("user_email"))
                 if entry.get("user_email") == winner_email:
                     all_entries[i]["status"] = "win"
-                    all_entries[i]["user_name"] = winner_name  # Store name
-                    all_entries[i]["winner_name"] = winner_name  # Store as winner_name
+                    all_entries[i]["user_name"] = winner_name
+                    all_entries[i]["winner_name"] = winner_name
                     updated = True
                 else:
                     all_entries[i]["status"] = "loss"
@@ -257,6 +265,58 @@ async def update_draw_result(draw_id: str, request: Request):
         if updated:
             user_draws_db.write_all(all_entries)
             lucky_db.update(draw_id, {"status": "completed"})
+            
+            # ========== Send emails to all participants ==========
+            from api.utils.email import EmailService
+            import asyncio
+            
+            email_service = EmailService()
+            
+            # Helper function to send emails
+            def send_emails_sync():
+                # Create new event loop
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    # Send email to winner
+                    loop.run_until_complete(
+                        email_service.send_draw_result_notification(
+                            to_email=winner_email,
+                            user_name=winner_name,
+                            draw_title=draw_title,
+                            is_winner=True,
+                            prize_amount=draw_prize
+                        )
+                    )
+                    print(f"✅ Winner email sent to {winner_email}")
+                    
+                    # Send emails to losers
+                    for entry in all_entries:
+                        if entry.get("lucky_draw_id") == draw_id:
+                            if entry.get("user_email") != winner_email:
+                                loser_email = entry.get("user_email")
+                                loser_info = users_db.find_by_field("email", loser_email)
+                                loser_name = loser_info[0].get("name", "User") if loser_info else "User"
+                                
+                                loop.run_until_complete(
+                                    email_service.send_draw_result_notification(
+                                        to_email=loser_email,
+                                        user_name=loser_name,
+                                        draw_title=draw_title,
+                                        is_winner=False,
+                                        prize_amount=0
+                                    )
+                                )
+                                print(f"✅ Loser email sent to {loser_email}")
+                finally:
+                    loop.close()
+            
+            # Run email sending in background thread
+            import threading
+            email_thread = threading.Thread(target=send_emails_sync)
+            email_thread.start()
+            # ====================================================
+            
             return {
                 "success": True, 
                 "message": "Draw result updated", 
@@ -289,11 +349,11 @@ async def run_draw_endpoint(draw_id: str, request: Request):
         if draw["status"] not in ["open", "awaiting"]:
             raise HTTPException(status_code=400, detail="Draw cannot be run")
         
+        # This function already sends emails
         winner = run_draw(draw_id)
         
         if winner:
             lucky_db.update(draw_id, {"status": "completed"})
-            # Make sure winner name is included
             return {
                 "winner": {
                     "user_email": winner["user_email"],
@@ -303,13 +363,12 @@ async def run_draw_endpoint(draw_id: str, request: Request):
                 "success": True
             }
         
-        # No participants - set to awaiting
         lucky_db.update(draw_id, {"status": "awaiting"})
         return {"message": "No participants for this draw", "success": False, "status": "awaiting"}
     except Exception as e:
         print(f"Error in run_draw_endpoint: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-    
+     
 @router.delete("/delete-draw/{draw_id}")
 async def delete_draw(draw_id: str, request: Request):
     """Delete a draw (soft delete by setting visible=False)"""
@@ -354,7 +413,7 @@ async def get_pending_payments(request: Request):
     except Exception as e:
         print(f"Error getting pending payments: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-
+  
 @router.post("/approve-payment/{payment_id}")
 async def approve_payment(payment_id: str, request: Request):
     """Approve a payment and enroll user"""
@@ -379,6 +438,30 @@ async def approve_payment(payment_id: str, request: Request):
         payment["approved_by"] = user_email
         payments_db.update(payment_id, payment)
         
+        # ========== SEND APPROVAL EMAIL (using asyncio.create_task) ==========
+        from api.utils.email import EmailService
+        import asyncio
+        
+        email_service = EmailService()
+        
+        # Get user name
+        user_info = users_db.find_by_field("email", payment["user_email"])
+        user_name = user_info[0].get("name", "User") if user_info else "User"
+        
+        print(f"📧 Sending approval email to: {payment['user_email']}")
+        
+        # Use asyncio.create_task instead of new event loop
+        asyncio.create_task(
+            email_service.send_payment_approval_email(
+                to_email=payment["user_email"],
+                user_name=user_name,
+                draw_title=payment["lucky_draw_title"],
+                amount=payment["amount"]
+            )
+        )
+        print(f"✅ Approval email task created for {payment['user_email']}")
+        # ======================================
+        
         # Check if user already has an enrollment for this draw
         enrollments = user_draws_db.find_by_field("user_email", payment["user_email"])
         existing_enrollment = None
@@ -388,10 +471,8 @@ async def approve_payment(payment_id: str, request: Request):
                 break
         
         if existing_enrollment:
-            # Update existing enrollment to open
             user_draws_db.update(existing_enrollment["id"], {"status": "open"})
         else:
-            # Create new enrollment
             enrollment = {
                 "id": str(uuid.uuid4()),
                 "user_email": payment["user_email"],
@@ -406,7 +487,7 @@ async def approve_payment(payment_id: str, request: Request):
     except Exception as e:
         print(f"Error approving payment: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-
+    
 @router.post("/reject-payment/{payment_id}")
 async def reject_payment(payment_id: str, request: Request):
     """Reject a payment and remove user from draw completely"""
@@ -433,13 +514,32 @@ async def reject_payment(payment_id: str, request: Request):
         payment["rejection_reason"] = reason
         payments_db.update(payment_id, payment)
         
+        # ========== SEND REJECTION EMAIL ==========
+        from api.utils.email import EmailService
+        email_service = EmailService()
+        
+        # Get user name
+        user_info = users_db.find_by_field("email", payment["user_email"])
+        user_name = user_info[0].get("name", "User") if user_info else "User"
+        
+        print(f"📧 Sending rejection email to: {payment['user_email']}, Reason: {reason}")
+        
+        # Send email synchronously
+        email_service.send_payment_rejection_email_sync(
+            to_email=payment["user_email"],
+            user_name=user_name,
+            draw_title=payment["lucky_draw_title"],
+            amount=payment["amount"],
+            reason=reason
+        )
+        # ========================================
+        
         # IMPORTANT: Delete user from draw completely (remove enrollment)
         enrollments = user_draws_db.read_all()
         updated_enrollments = []
         deleted = False
         
         for enrollment in enrollments:
-            # Keep all enrollments except the one for this rejected payment
             if not (enrollment.get("user_email") == payment["user_email"] 
                     and enrollment.get("lucky_draw_id") == payment["lucky_draw_id"]):
                 updated_enrollments.append(enrollment)
@@ -448,7 +548,6 @@ async def reject_payment(payment_id: str, request: Request):
                 print(f"Deleted enrollment for user {payment['user_email']} from draw {payment['lucky_draw_id']}")
         
         if deleted:
-            # Write back the filtered list (without the rejected user)
             user_draws_db.write_all(updated_enrollments)
         
         return {

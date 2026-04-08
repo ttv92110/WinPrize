@@ -206,7 +206,7 @@ class EmailService:
             
             Don't miss this chance to win big!
             
-            Visit WinPrize to join: https://winprize.onrender.com
+            Visit WinPrize to join: https://winprize.vercel.app
             """
             
             message = MIMEMultipart("alternative")
@@ -266,7 +266,7 @@ class EmailService:
                 
                 The prize amount will be credited to your account soon.
                 
-                View winners: https://winprize.onrender.com/winner
+                View winners: https://winprize.vercel.app/winner
                 """
             else:
                 text_content = f"""
@@ -279,7 +279,7 @@ class EmailService:
                 
                 Don't worry! More draws are coming soon.
                 
-                View active draws: https://winprize.onrender.com/#draws
+                View active draws: https://winprize.vercel.app/#draws
                 """
             
             message = MIMEMultipart("alternative")
@@ -305,12 +305,123 @@ class EmailService:
             print(f"Error sending draw result notification: {str(e)}")
             return False
     
+    def send_draw_result_notification_sync(self, to_email: str, user_name: str, draw_title: str, is_winner: bool, prize_amount: int = 0):
+        """Synchronous version of send_draw_result_notification"""
+        try:
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(
+                    self.send_draw_result_notification(to_email, user_name, draw_title, is_winner, prize_amount)
+                )
+            finally:
+                loop.close()
+            return True
+        except Exception as e:
+            print(f"Error in sync email send: {str(e)}")
+            return False
+        
+    async def send_payment_approval_email(self, to_email: str, user_name: str, draw_title: str, amount: int):
+        """Send email notification for payment approval"""
+        try:
+            print(f"📧 send_payment_approval_email called for {to_email}")
+            
+            html_content = self.templates.TemplateResponse(
+                "emails/email_payment_approval.html",
+                {
+                    "request": None,
+                    "user_name": user_name,
+                    "draw_title": draw_title,
+                    "amount": amount
+                }
+            ).body.decode()
+            
+            text_content = f"""
+            Payment Approved
+            
+            Hello {user_name},
+            
+            Your payment for {draw_title} has been approved!
+            
+            Amount Paid: Rs. {amount}
+            Status: Approved
+            
+            You are now successfully enrolled in the draw. Good luck!
+            
+            View draws: https://winprize.vercel.app/draws
+            """
+            
+            message = MIMEMultipart("alternative")
+            message["Subject"] = "✅ Payment Approved - WinPrize"
+            message["From"] = f"{self.from_name} <{self.from_email}>"
+            message["To"] = to_email
+            
+            message.attach(MIMEText(text_content, "plain"))
+            message.attach(MIMEText(html_content, "html"))
+            
+            await aiosmtplib.send(
+                message,
+                hostname=self.smtp_host,
+                port=self.smtp_port,
+                username=self.smtp_user,
+                password=self.smtp_password,
+                start_tls=True,
+                timeout=120
+            )
+            
+            print(f"✅ Payment approval email sent to {to_email}")
+            return True
+        except Exception as e:
+            print(f"❌ Error sending payment approval email: {str(e)}")
+            return False   
 
-# await aiosmtplib.send(
-#     message,
-#     hostname=self.smtp_host,
-#     port=self.smtp_port,
-#     username=self.smtp_user,
-#     password=self.smtp_password,
-#     start_tls=True
-# )
+    def send_payment_rejection_email_sync(self, to_email: str, user_name: str, draw_title: str, amount: int, reason: str):
+        """Synchronous version of payment rejection email"""
+        try:
+            print(f"📧 SYNC: Sending rejection email to {to_email}")
+            
+            # Render HTML template
+            html_content = self.templates.TemplateResponse(
+                "emails/email_payment_rejection.html",
+                {
+                    "request": None,
+                    "user_name": user_name,
+                    "draw_title": draw_title,
+                    "amount": amount,
+                    "reason": reason
+                }
+            ).body.decode()
+            
+            text_content = f"""
+            Payment Rejected
+            
+            Hello {user_name},
+            
+            Your payment for {draw_title} has been rejected.
+            
+            Amount: Rs. {amount}
+            Reason: {reason}
+            
+            View payment status: https://winprize.vercel.app/payment-status
+            """
+            
+            message = MIMEMultipart("alternative")
+            message["Subject"] = "❌ Payment Rejected - WinPrize"
+            message["From"] = f"{self.from_name} <{self.from_email}>"
+            message["To"] = to_email
+            
+            message.attach(MIMEText(text_content, "plain"))
+            message.attach(MIMEText(html_content, "html"))
+            
+            import smtplib
+            with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+                server.starttls()
+                server.login(self.smtp_user, self.smtp_password)
+                server.send_message(message)
+            
+            print(f"✅ SYNC: Payment rejection email sent to {to_email}")
+            return True
+        except Exception as e:
+            print(f"❌ SYNC: Error sending rejection email: {str(e)}")
+            return False

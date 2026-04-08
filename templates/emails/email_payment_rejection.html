@@ -2,7 +2,6 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
             font-family: 'Poppins', Arial, sans-serif;
@@ -19,18 +18,28 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         .header {
-            background: linear-gradient(135deg, #6c757d, #495057);
+            background: linear-gradient(135deg, #dc3545, #c82333);
             color: white;
             padding: 40px 30px;
             text-align: center;
         }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
         .content {
             padding: 40px 30px;
-            text-align: center;
+        }
+        .reason-box {
+            background: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
         }
         .button {
             display: inline-block;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: #dc3545;
             color: white;
             text-decoration: none;
             padding: 12px 30px;
@@ -50,15 +59,20 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Draw Result Announced</h1>
+            <h1>❌ Payment Rejected</h1>
         </div>
         <div class="content">
             <p>Hello <strong>{{ user_name }}</strong>,</p>
-            <p>The winner for <strong>{{ draw_title }}</strong> has been announced.</p>
-            <p>Unfortunately, you didn't win this time.</p>
-            <p>Don't worry! More draws are coming soon. Better luck next time! 🍀</p>
+            <p>Your payment for <strong>{{ draw_title }}</strong> has been rejected.</p>
+            
+            <div class="reason-box">
+                <p><strong>Amount:</strong> Rs. {{ amount }}</p>
+                <p><strong>Reason:</strong> {{ reason }}</p>
+            </div>
+            
+            <p>Please contact support for further assistance or try again with correct payment details.</p>
             <div style="text-align: center;">
-                <a href="https://winprize.vercel.app/#draws" class="button">View Active Draws</a>
+                <a href="https://winprize.vercel.app/payment-status" class="button">View Payment Status</a>
             </div>
         </div>
         <div class="footer">
