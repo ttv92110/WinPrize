@@ -37,6 +37,8 @@ async function checkAdminStatus() {
             loadUsers();           // new
             loadVerifications();   // new
             loadUserDraws();       // new
+            loadAllPayments();     // new
+
         } else {
             showAccessDenied("You don't have admin privileges");
         }
@@ -567,60 +569,6 @@ async function loadStats() {
     }
 }
 
-// ========== Load Users ==========
-async function loadUsers() {
-    try {
-        const res = await fetch(`/admin/users?email=${encodeURIComponent(currentAdmin.email)}`);
-        if (!res.ok) throw new Error('Failed to load users');
-        const users = await res.json();
-        const tbody = document.getElementById('usersTableBody');
-        if (!users.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No users found</td></tr>';
-            return;
-        }
-        tbody.innerHTML = '';
-        for (const user of users) {
-            // Get verification status from verifications table
-            let verified = 'N/A';
-            try {
-                const verRes = await fetch(`/admin/verifications?email=${encodeURIComponent(currentAdmin.email)}`);
-                const vers = await verRes.json();
-                const userVer = vers.find(v => v.email === user.email);
-                verified = userVer ? (userVer.verified ? 'Yes' : 'No') : 'No';
-            } catch (e) { console.error(e); }
-            const row = `
-                <tr>
-                    <td>${user.id.substring(0, 8)}...</td>
-                    <td>${user.name}</td>
-                    <td>${user.email}</td>
-                    <td>
-                        <select class="form-select form-select-sm user-status-select" data-id="${user.id}" data-email="${user.email}" style="width:auto; display:inline-block;">
-                            <option value="user" ${user.user_status === 'user' ? 'selected' : ''}>User</option>
-                            <option value="staff" ${user.user_status === 'staff' ? 'selected' : ''}>Staff</option>
-                        </select>
-                    </td>
-                    <td>${verified}</td>
-                    <td>
-                        <button class="btn btn-sm btn-danger" onclick="deleteUser('${user.id}')">Delete</button>
-                    </td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
-        }
-        // Attach change event to status selects
-        document.querySelectorAll('.user-status-select').forEach(select => {
-            select.addEventListener('change', async (e) => {
-                const userId = select.dataset.id;
-                const newStatus = select.value;
-                await updateUserStatus(userId, newStatus);
-            });
-        });
-    } catch (error) {
-        console.error('Error loading users:', error);
-        document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load users</td></tr>';
-    }
-}
-
 async function updateUserStatus(userId, newStatus) {
     try {
         const res = await fetch(`/admin/user/${userId}`, {
@@ -644,90 +592,6 @@ async function updateUserStatus(userId, newStatus) {
         loadUsers();
     }
 }
-
-async function deleteUser(userId) {
-    if (!confirm('Are you sure you want to delete this user and all their data? This action is irreversible!')) return;
-    try {
-        const res = await fetch(`/admin/user/${userId}?admin_email=${encodeURIComponent(currentAdmin.email)}`, {
-            method: 'DELETE'
-        });
-        const data = await res.json();
-        if (data.success) {
-            showToast('User deleted successfully', 'success');
-            loadUsers();           // refresh users table
-            loadVerifications();   // refresh verifications table
-            loadUserDraws();       // refresh user draws table
-            loadStats();           // refresh statistics
-        } else {
-            showToast(data.message || 'Failed to delete user', 'danger');
-        }
-    } catch (error) {
-        console.error(error);
-        showToast('Error deleting user', 'danger');
-    }
-}
-
-// ========== Load Verifications ==========
-async function loadVerifications() {
-    try {
-        const res = await fetch(`/admin/verifications?email=${encodeURIComponent(currentAdmin.email)}`);
-        if (!res.ok) throw new Error('Failed to load verifications');
-        const vers = await res.json();
-        const tbody = document.getElementById('verificationsTableBody');
-        if (!vers.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No verifications found</td></tr>';
-            return;
-        }
-        tbody.innerHTML = '';
-        vers.forEach(v => {
-            const row = `
-                <tr>
-                    <td>${v.email}</td>
-                    <td>${v.name}</td>
-                    <td>${v.pin}</td>
-                    <td>${v.created_at || 'N/A'}</td>
-                    <td>${v.expires_at || 'N/A'}</td>
-                    <td>${v.verified ? 'Yes' : 'No'}</td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
-        });
-    } catch (error) {
-        console.error('Error loading verifications:', error);
-        document.getElementById('verificationsTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load</td></tr>';
-    }
-}
-
-// ========== Load User Draws ==========
-async function loadUserDraws() {
-    try {
-        const res = await fetch(`/admin/user-draws?email=${encodeURIComponent(currentAdmin.email)}`);
-        if (!res.ok) throw new Error('Failed to load user draws');
-        const draws = await res.json();
-        const tbody = document.getElementById('userDrawsTableBody');
-        if (!draws.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No enrollments found</td></tr>';
-            return;
-        }
-        tbody.innerHTML = '';
-        draws.forEach(d => {
-            const row = `
-                <tr>
-                    <td>${d.user_email}</td>
-                    <td>${d.lucky_draw_id}</td>
-                    <td>Rs. ${d.user_pay}</td>
-                    <td>${d.status}</td>
-                    <td>${d.joined_at || 'N/A'}</td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
-        });
-    } catch (error) {
-        console.error('Error loading user draws:', error);
-        document.getElementById('userDrawsTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Failed to load</td></tr>';
-    }
-}
-
 
 // ========== Verification Management ==========
 async function updateVerification(verificationId, field, value) {
@@ -949,7 +813,7 @@ async function loadUserDraws() {
     }
 }
 
-// Also extend loadUsers to allow name editing (inline)
+// ========== Load Users (Enhanced with Name Edit, Status Dropdown, Verified Dropdown) ==========
 async function loadUsers() {
     try {
         const res = await fetch(`/admin/users?email=${encodeURIComponent(currentAdmin.email)}`);
@@ -962,7 +826,7 @@ async function loadUsers() {
         }
         tbody.innerHTML = '';
         for (const user of users) {
-            // Get verification status
+            // Get verification status from verifications table
             let verified = 'N/A';
             try {
                 const verRes = await fetch(`/admin/verifications?email=${encodeURIComponent(currentAdmin.email)}`);
@@ -974,19 +838,26 @@ async function loadUsers() {
                 <tr>
                     <td>${user.id.substring(0, 8)}...</td>
                     <td>
-                        <input type="text" class="form-control form-control-sm user-name-input" value="${user.name}" data-id="${user.id}" style="width:150px;">
+                        <input type="text" class="form-control form-control-sm user-name-input" value="${escapeHtml(user.name)}" data-id="${user.id}" style="width:150px;">
                         <button class="btn btn-sm btn-primary update-name" data-id="${user.id}">Save</button>
-                    </td>
-                    <td>${user.email}</td>
+                     </td>
+                    <td>${escapeHtml(user.email)}</td>
                     <td>
                         <select class="form-select form-select-sm user-status-select" data-id="${user.id}">
                             <option value="user" ${user.user_status === 'user' ? 'selected' : ''}>User</option>
                             <option value="staff" ${user.user_status === 'staff' ? 'selected' : ''}>Staff</option>
                         </select>
-                    </td>
-                    <td>${verified}</td>
-                    <td><button class="btn btn-sm btn-danger delete-user" data-id="${user.id}">Delete</button></td>
-                </tr>
+                     </td>
+                    <td>
+                        <select class="form-select form-select-sm user-verified-select" data-email="${user.email}">
+                            <option value="true" ${verified === 'Yes' ? 'selected' : ''}>Yes</option>
+                            <option value="false" ${verified === 'No' ? 'selected' : ''}>No</option>
+                        </select>
+                     </td>
+                    <td>
+                        <button class="btn btn-sm btn-danger delete-user" data-id="${user.id}">Delete</button>
+                     </td>
+                 </tr>
             `;
             tbody.innerHTML += row;
         }
@@ -1006,6 +877,14 @@ async function loadUsers() {
                 await updateUserField(userId, 'user_status', newStatus);
             });
         });
+        // Verified update
+        document.querySelectorAll('.user-verified-select').forEach(select => {
+            select.addEventListener('change', async (e) => {
+                const email = select.dataset.email;
+                const newVerified = select.value === 'true';
+                await updateUserVerification(email, newVerified);
+            });
+        });
         // Delete user
         document.querySelectorAll('.delete-user').forEach(btn => {
             btn.addEventListener('click', async (e) => {
@@ -1017,6 +896,17 @@ async function loadUsers() {
         console.error('Error loading users:', error);
         document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load users</td></tr>';
     }
+}
+
+// Helper to escape HTML (prevent XSS)
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function (m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
 }
 
 async function updateUserField(userId, field, value) {
@@ -1038,5 +928,148 @@ async function updateUserField(userId, field, value) {
     } catch (error) {
         console.error(error);
         showToast('Error updating user', 'danger');
+    }
+}
+
+async function updateUserVerification(email, verified) {
+    try {
+        const res = await fetch(`/admin/user-verification/${email}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                admin_email: currentAdmin.email,
+                verified: verified
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast(`Verification status updated`, 'success');
+            loadUsers(); // refresh to show updated status
+        } else {
+            showToast(data.detail || 'Update failed', 'danger');
+        }
+    } catch (error) {
+        console.error(error);
+        showToast('Error updating verification status', 'danger');
+    }
+}
+
+async function deleteUser(userId) {
+    if (!confirm('Are you sure you want to delete this user and all their data? This action is irreversible!')) return;
+    try {
+        const res = await fetch(`/admin/user/${userId}?admin_email=${encodeURIComponent(currentAdmin.email)}`, {
+            method: 'DELETE'
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('User deleted successfully', 'success');
+            loadUsers();           // refresh users table
+            loadVerifications();   // refresh verifications table
+            loadUserDraws();       // refresh user draws table
+            loadStats();           // refresh statistics
+        } else {
+            showToast(data.message || 'Failed to delete user', 'danger');
+        }
+    } catch (error) {
+        console.error(error);
+        showToast('Error deleting user', 'danger');
+    }
+}
+
+// ========== Load All Payments ==========
+async function loadAllPayments() {
+    try {
+        const res = await fetch(`/admin/all-payments?email=${encodeURIComponent(currentAdmin.email)}`);
+        if (!res.ok) throw new Error('Failed to load payments');
+        const payments = await res.json();
+        const tbody = document.getElementById('paymentsTableBody');
+        if (!payments.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No payments found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        payments.forEach(p => {
+            const statusOptions = ['pending', 'paid', 'cancel'];
+            const statusSelect = `<select class="form-select form-select-sm payment-status-select" data-id="${p.id}">
+                ${statusOptions.map(opt => `<option value="${opt}" ${p.status === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+            </select>`;
+            const row = `
+                <tr>
+                    <td>${escapeHtml(p.user_email)}<br><small>${escapeHtml(p.user_name || '')}</small></td>
+                    <td>${p.lucky_draw_title || p.lucky_draw_id}</td>
+                    <td>Rs. ${p.amount}</td>
+                    <td>${statusSelect}</td>
+                    <td>${p.transaction_id || 'N/A'}</td>
+                    <td>${formatDate(p.created_at)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger delete-payment" data-id="${p.id}">Delete</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+        // Attach event handlers
+        document.querySelectorAll('.payment-status-select').forEach(select => {
+            select.addEventListener('change', async (e) => {
+                const paymentId = select.dataset.id;
+                const newStatus = select.value;
+                await updatePaymentStatus(paymentId, newStatus);
+            });
+        });
+        document.querySelectorAll('.delete-payment').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const paymentId = btn.dataset.id;
+                await deletePayment(paymentId);
+            });
+        });
+    } catch (error) {
+        console.error('Error loading payments:', error);
+        document.getElementById('paymentsTableBody').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Failed to load</td></tr>';
+    }
+}
+
+async function updatePaymentStatus(paymentId, newStatus) {
+    try {
+        const res = await fetch(`/admin/payment/${paymentId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                admin_email: currentAdmin.email,
+                status: newStatus
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast(`Payment status updated to ${newStatus}`, 'success');
+            loadAllPayments();      // refresh table
+            loadStats();            // update statistics
+            loadPendingPayments();  // update pending section if visible
+        } else {
+            showToast('Update failed', 'danger');
+        }
+    } catch (error) {
+        console.error(error);
+        showToast('Error updating payment', 'danger');
+    }
+}
+
+async function deletePayment(paymentId) {
+    if (!confirm('Delete this payment record? This action is irreversible.')) return;
+    try {
+        const res = await fetch(`/admin/payment/${paymentId}?admin_email=${encodeURIComponent(currentAdmin.email)}`, {
+            method: 'DELETE'
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Payment deleted', 'success');
+            loadAllPayments();      // refresh table
+            loadStats();            // update statistics
+            loadPendingPayments();  // update pending section
+        } else {
+            showToast('Delete failed', 'danger');
+        }
+    } catch (error) {
+        console.error(error);
+        showToast('Error deleting payment', 'danger');
     }
 }

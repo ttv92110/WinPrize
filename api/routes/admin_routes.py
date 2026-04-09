@@ -708,6 +708,7 @@ async def delete_user_by_admin(user_id: str, request: Request):
     except Exception as e:
         print(f"Error deleting user: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
 # ========== Admin: Verification Management ==========
 @router.put("/verification/{verification_id}")
 async def update_verification(verification_id: str, request: Request):
@@ -814,5 +815,97 @@ async def delete_user_draw(draw_id: str, request: Request):
         return {"success": True, "message": "Enrollment deleted"}
     except Exception as e:
         print(f"Error deleting user draw: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/user-verification/{email}")
+async def update_user_verification(email: str, request: Request):
+    """Update user's email verification status (admin only)"""
+    try:
+        body = await request.json()
+        admin_email = body.get("admin_email")
+        if not admin_email or not is_admin(admin_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        verified = body.get("verified")
+        if verified is None:
+            raise HTTPException(status_code=400, detail="Verified status required")
+        
+        # Find verification record for this email
+        verifications = sheets_db_manager.verifications_db.find_by_field("email", email)
+        if not verifications:
+            raise HTTPException(status_code=404, detail="No verification record found for this user")
+        
+        # Update the most recent verification record
+        verification = sorted(verifications, key=lambda x: x.get("created_at", ""), reverse=True)[0]
+        verification["verified"] = verified
+        sheets_db_manager.verifications_db.update(verification["id"], verification)
+        
+        return {"success": True, "message": f"Verification status updated to {verified}"}
+    except Exception as e:
+        print(f"Error updating user verification: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ========== Admin: Payment Management ==========
+@router.get("/all-payments")
+async def get_all_payments_admin(request: Request):
+    """Get all payments (admin only)"""
+    try:
+        user_email = request.query_params.get("email")
+        if not user_email or not is_admin(user_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        from api.routes.payment_routes import payments_db
+        all_payments = payments_db.read_all()
+        # Sort by date descending
+        all_payments.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+        return all_payments
+    except Exception as e:
+        print(f"Error getting all payments: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/payment/{payment_id}")
+async def update_payment_by_admin(payment_id: str, request: Request):
+    """Update payment status or notes (admin only)"""
+    try:
+        body = await request.json()
+        admin_email = body.get("admin_email")
+        if not admin_email or not is_admin(admin_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        from api.routes.payment_routes import payments_db
+        payment = payments_db.find_by_id(payment_id)
+        if not payment:
+            raise HTTPException(status_code=404, detail="Payment not found")
+        
+        # Update allowed fields
+        if "status" in body:
+            payment["status"] = body["status"]
+        if "notes" in body:
+            payment["notes"] = body["notes"]
+        payment["updated_at"] = datetime.now().strftime("%d/%m/%YT%Hh:%Mm:%Ss")
+        
+        payments_db.update(payment_id, payment)
+        return {"success": True, "payment": payment}
+    except Exception as e:
+        print(f"Error updating payment: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/payment/{payment_id}")
+async def delete_payment_by_admin(payment_id: str, request: Request):
+    """Delete a payment record (admin only)"""
+    try:
+        admin_email = request.query_params.get("admin_email")
+        if not admin_email or not is_admin(admin_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        from api.routes.payment_routes import payments_db
+        payment = payments_db.find_by_id(payment_id)
+        if not payment:
+            raise HTTPException(status_code=404, detail="Payment not found")
+        
+        payments_db.delete(payment_id)
+        return {"success": True, "message": "Payment deleted"}
+    except Exception as e:
+        print(f"Error deleting payment: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     
