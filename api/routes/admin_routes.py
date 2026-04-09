@@ -559,3 +559,260 @@ async def reject_payment(payment_id: str, request: Request):
         print(f"Error rejecting payment: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
     
+# ========== Admin: User Management ==========
+@router.get("/users")
+async def get_all_users_admin(request: Request):
+    """Get all users (admin only)"""
+    try:
+        user_email = request.query_params.get("email")
+        if not user_email or not is_admin(user_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        all_users = users_db.read_all()
+        # Remove passwords
+        for user in all_users:
+            if "password" in user:
+                del user["password"]
+        return all_users
+    except Exception as e:
+        print(f"Error getting users: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/verifications")
+async def get_all_verifications_admin(request: Request):
+    """Get all email verifications (admin only)"""
+    try:
+        user_email = request.query_params.get("email")
+        if not user_email or not is_admin(user_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        verifications = sheets_db_manager.verifications_db.read_all()
+        return verifications
+    except Exception as e:
+        print(f"Error getting verifications: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/user-draws")
+async def get_all_user_draws_admin(request: Request):
+    """Get all user enrollments (admin only)"""
+    try:
+        user_email = request.query_params.get("email")
+        if not user_email or not is_admin(user_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        user_draws = user_draws_db.read_all()
+        return user_draws
+    except Exception as e:
+        print(f"Error getting user draws: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/payment-stats")
+async def get_payment_stats(request: Request):
+    """Get payment statistics (admin only)"""
+    try:
+        user_email = request.query_params.get("email")
+        if not user_email or not is_admin(user_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        from api.routes.payment_routes import payments_db
+        all_payments = payments_db.read_all()
+        
+        total_paid = 0
+        total_pending = 0
+        total_cancelled = 0
+        total_amount = 0
+        
+        for p in all_payments:
+            status = p.get("status")
+            amount = p.get("amount", 0)
+            if status == "paid":
+                total_paid += 1
+                total_amount += amount
+            elif status == "pending":
+                total_pending += 1
+            elif status == "cancel":
+                total_cancelled += 1
+        
+        return {
+            "total_paid": total_paid,
+            "total_pending": total_pending,
+            "total_cancelled": total_cancelled,
+            "total_amount": total_amount
+        }
+    except Exception as e:
+        print(f"Error getting payment stats: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/user/{user_id}")
+async def update_user_by_admin(user_id: str, request: Request):
+    """Update user details (status, name) - admin only"""
+    try:
+        body = await request.json()
+        admin_email = body.get("admin_email")
+        if not admin_email or not is_admin(admin_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        user = users_db.find_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Update allowed fields
+        if "name" in body:
+            user["name"] = body["name"]
+        if "user_status" in body:
+            user["user_status"] = body["user_status"]
+        
+        users_db.update(user_id, user)
+        # Remove password from response
+        if "password" in user:
+            del user["password"]
+        return {"success": True, "user": user}
+    except Exception as e:
+        print(f"Error updating user: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/user/{user_id}")
+async def delete_user_by_admin(user_id: str, request: Request):
+    """Delete a user and associated data (admin only)"""
+    try:
+        admin_email = request.query_params.get("admin_email")
+        if not admin_email or not is_admin(admin_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        user = users_db.find_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        email = user["email"]
+        
+        # Delete user
+        users_db.delete(user_id)
+        
+        # Delete related verifications
+        verifications = sheets_db_manager.verifications_db.find_by_field("email", email)
+        for v in verifications:
+            sheets_db_manager.verifications_db.delete(v["id"])
+        
+        # Delete user draws
+        user_draws = user_draws_db.find_by_field("user_email", email)
+        for ud in user_draws:
+            user_draws_db.delete(ud["id"])
+        
+        # Optionally delete payments (or just mark as orphaned)
+        from api.routes.payment_routes import payments_db
+        payments = payments_db.find_by_field("user_email", email)
+        for p in payments:
+            payments_db.delete(p["id"])
+        
+        return {"success": True, "message": "User and associated data deleted"}
+    except Exception as e:
+        print(f"Error deleting user: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+# ========== Admin: Verification Management ==========
+@router.put("/verification/{verification_id}")
+async def update_verification(verification_id: str, request: Request):
+    """Update verification (PIN, verified status) - admin only"""
+    try:
+        body = await request.json()
+        admin_email = body.get("admin_email")
+        if not admin_email or not is_admin(admin_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        verification = sheets_db_manager.verifications_db.find_by_id(verification_id)
+        if not verification:
+            raise HTTPException(status_code=404, detail="Verification not found")
+        
+        # Update allowed fields
+        if "pin" in body:
+            verification["pin"] = str(body["pin"]).zfill(6)
+        if "verified" in body:
+            verification["verified"] = body["verified"] in [True, "true", "True", 1]
+        
+        sheets_db_manager.verifications_db.update(verification_id, verification)
+        return {"success": True, "verification": verification}
+    except Exception as e:
+        print(f"Error updating verification: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/verification/{verification_id}")
+async def delete_verification(verification_id: str, request: Request):
+    """Delete a verification record - admin only"""
+    try:
+        admin_email = request.query_params.get("admin_email")
+        if not admin_email or not is_admin(admin_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        verification = sheets_db_manager.verifications_db.find_by_id(verification_id)
+        if not verification:
+            # Already deleted, treat as success
+            return {"success": True, "message": "Verification already deleted"}
+        
+        sheets_db_manager.verifications_db.delete(verification_id)
+        return {"success": True, "message": "Verification deleted"}
+    except Exception as e:
+        print(f"Error deleting verification: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    
+# ========== Admin: User Draw Management ==========
+@router.get("/draws-list")
+async def get_all_draws_list(request: Request):
+    """Get list of all draw IDs and titles (for dropdown) - admin only"""
+    try:
+        admin_email = request.query_params.get("admin_email")
+        if not admin_email or not is_admin(admin_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        all_draws = lucky_db.read_all()
+        draw_list = [{"id": d["id"], "title": d.get("title", d["id"])} for d in all_draws]
+        return draw_list
+    except Exception as e:
+        print(f"Error getting draws list: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/user-draw/{draw_id}")
+async def update_user_draw(draw_id: str, request: Request):
+    """Update user draw (status, lucky_draw_id) - admin only"""
+    try:
+        body = await request.json()
+        admin_email = body.get("admin_email")
+        if not admin_email or not is_admin(admin_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        enrollment = user_draws_db.find_by_id(draw_id)
+        if not enrollment:
+            raise HTTPException(status_code=404, detail="Enrollment not found")
+        
+        # Update allowed fields
+        if "status" in body:
+            enrollment["status"] = body["status"]
+        if "lucky_draw_id" in body:
+            # Validate that the target draw exists
+            target_draw = lucky_db.find_by_id(body["lucky_draw_id"])
+            if not target_draw:
+                raise HTTPException(status_code=400, detail="Target draw not found")
+            enrollment["lucky_draw_id"] = body["lucky_draw_id"]
+        
+        user_draws_db.update(draw_id, enrollment)
+        return {"success": True, "enrollment": enrollment}
+    except Exception as e:
+        print(f"Error updating user draw: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/user-draw/{draw_id}")
+async def delete_user_draw(draw_id: str, request: Request):
+    """Delete a user draw enrollment - admin only"""
+    try:
+        admin_email = request.query_params.get("admin_email")
+        if not admin_email or not is_admin(admin_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        enrollment = user_draws_db.find_by_id(draw_id)
+        if not enrollment:
+            raise HTTPException(status_code=404, detail="Enrollment not found")
+        
+        user_draws_db.delete(draw_id)
+        return {"success": True, "message": "Enrollment deleted"}
+    except Exception as e:
+        print(f"Error deleting user draw: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    

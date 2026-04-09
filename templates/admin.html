@@ -56,6 +56,7 @@
             100% { transform: rotate(360deg); }
         }
     </style>
+
 </head>
 <body>
     <!-- Loading State -->
@@ -91,6 +92,66 @@
         <div class="container mt-4">
             <input type="hidden" id="adminEmail">
             
+            
+            <!-- Statistics Cards -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h4 class="mb-3"><i class="fas fa-chart-line me-2"></i>Payment Statistics</h4>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white bg-success h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Approved Payments</h6>
+                                    <h2 class="mb-0" id="statPaid">0</h2>
+                                </div>
+                                <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white bg-warning h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Pending Payments</h6>
+                                    <h2 class="mb-0" id="statPending">0</h2>
+                                </div>
+                                <i class="fas fa-clock fa-3x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white bg-danger h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Rejected Payments</h6>
+                                    <h2 class="mb-0" id="statCancelled">0</h2>
+                                </div>
+                                <i class="fas fa-times-circle fa-3x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-white bg-info h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Total Amount Paid</h6>
+                                    <h2 class="mb-0" id="statAmount">Rs. 0</h2>
+                                </div>
+                                <i class="fas fa-rupee-sign fa-3x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Create New Draw Section -->
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
@@ -183,8 +244,79 @@
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Users Management Table -->
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Users Management</h5>
+                    <button class="btn btn-sm btn-light" onclick="loadUsers()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th><th>Name</th><th>Email</th><th>Status</th><th>Verified</th><th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr><td colspan="6" class="text-center">Loading users...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verifications Table (Optional) -->
+            <div class="card mt-4">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-envelope me-2"></i>Email Verifications</h5>
+                    <button class="btn btn-sm btn-light" onclick="loadVerifications()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr><th>Email</th><th>Name</th><th>PIN</th><th>Created</th><th>Expires</th><th>Verified</th></tr>
+                            </thead>
+                            <tbody id="verificationsTableBody">
+                                <tr><td colspan="6" class="text-center">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Draws Table -->
+            <div class="card mt-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>User Draw Enrollments</h5>
+                    <button class="btn btn-sm btn-light" onclick="loadUserDraws()">
+                        <i class="fas fa-sync-alt me-1"></i>Refresh
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr><th>User Email</th><th>Draw ID</th><th>Amount Paid</th><th>Status</th><th>Joined At</th></tr>
+                            </thead>
+                            <tbody id="userDrawsTableBody">
+                                <tr><td colspan="5" class="text-center">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    
+        </div> 
     </div>
+
+
 
     <!-- Access Denied Modal -->
     <div class="modal fade" id="accessDeniedModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
@@ -348,7 +480,7 @@
         </div>
     </div>
     <!-- End Winner Announcement Modal   -->
-     
+ 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../static/js/admin.js"></script>

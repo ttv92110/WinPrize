@@ -33,6 +33,10 @@ async function checkAdminStatus() {
             loadingState.style.display = 'none';
             adminContent.style.display = 'block';
             loadAdminDraws();
+            loadStats();           // new
+            loadUsers();           // new
+            loadVerifications();   // new
+            loadUserDraws();       // new
         } else {
             showAccessDenied("You don't have admin privileges");
         }
@@ -546,4 +550,493 @@ function showToast(message, type = 'success') {
     toast.addEventListener('hidden.bs.toast', function () {
         toast.remove();
     });
+}
+
+// ========== Load Statistics ==========
+async function loadStats() {
+    try {
+        const res = await fetch(`/admin/payment-stats?email=${encodeURIComponent(currentAdmin.email)}`);
+        if (!res.ok) throw new Error('Failed to load stats');
+        const stats = await res.json();
+        document.getElementById('statPaid').innerText = stats.total_paid;
+        document.getElementById('statPending').innerText = stats.total_pending;
+        document.getElementById('statCancelled').innerText = stats.total_cancelled;
+        document.getElementById('statAmount').innerText = `Rs. ${stats.total_amount.toLocaleString()}`;
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
+}
+
+// ========== Load Users ==========
+async function loadUsers() {
+    try {
+        const res = await fetch(`/admin/users?email=${encodeURIComponent(currentAdmin.email)}`);
+        if (!res.ok) throw new Error('Failed to load users');
+        const users = await res.json();
+        const tbody = document.getElementById('usersTableBody');
+        if (!users.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No users found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        for (const user of users) {
+            // Get verification status from verifications table
+            let verified = 'N/A';
+            try {
+                const verRes = await fetch(`/admin/verifications?email=${encodeURIComponent(currentAdmin.email)}`);
+                const vers = await verRes.json();
+                const userVer = vers.find(v => v.email === user.email);
+                verified = userVer ? (userVer.verified ? 'Yes' : 'No') : 'No';
+            } catch (e) { console.error(e); }
+            const row = `
+                <tr>
+                    <td>${user.id.substring(0, 8)}...</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>
+                        <select class="form-select form-select-sm user-status-select" data-id="${user.id}" data-email="${user.email}" style="width:auto; display:inline-block;">
+                            <option value="user" ${user.user_status === 'user' ? 'selected' : ''}>User</option>
+                            <option value="staff" ${user.user_status === 'staff' ? 'selected' : ''}>Staff</option>
+                        </select>
+                    </td>
+                    <td>${verified}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="deleteUser('${user.id}')">Delete</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        }
+        // Attach change event to status selects
+        document.querySelectorAll('.user-status-select').forEach(select => {
+            select.addEventListener('change', async (e) => {
+                const userId = select.dataset.id;
+                const newStatus = select.value;
+                await updateUserStatus(userId, newStatus);
+            });
+        });
+    } catch (error) {
+        console.error('Error loading users:', error);
+        document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load users</td></tr>';
+    }
+}
+
+async function updateUserStatus(userId, newStatus) {
+    try {
+        const res = await fetch(`/admin/user/${userId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                admin_email: currentAdmin.email,
+                user_status: newStatus
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast(`User status updated to ${newStatus}`, 'success');
+        } else {
+            showToast('Failed to update status', 'danger');
+            loadUsers(); // reload to revert
+        }
+    } catch (error) {
+        console.error(error);
+        showToast('Error updating status', 'danger');
+        loadUsers();
+    }
+}
+
+async function deleteUser(userId) {
+    if (!confirm('Are you sure you want to delete this user and all their data? This action is irreversible!')) return;
+    try {
+        const res = await fetch(`/admin/user/${userId}?admin_email=${encodeURIComponent(currentAdmin.email)}`, {
+            method: 'DELETE'
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('User deleted successfully', 'success');
+            loadUsers();           // refresh users table
+            loadVerifications();   // refresh verifications table
+            loadUserDraws();       // refresh user draws table
+            loadStats();           // refresh statistics
+        } else {
+            showToast(data.message || 'Failed to delete user', 'danger');
+        }
+    } catch (error) {
+        console.error(error);
+        showToast('Error deleting user', 'danger');
+    }
+}
+
+// ========== Load Verifications ==========
+async function loadVerifications() {
+    try {
+        const res = await fetch(`/admin/verifications?email=${encodeURIComponent(currentAdmin.email)}`);
+        if (!res.ok) throw new Error('Failed to load verifications');
+        const vers = await res.json();
+        const tbody = document.getElementById('verificationsTableBody');
+        if (!vers.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No verifications found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        vers.forEach(v => {
+            const row = `
+                <tr>
+                    <td>${v.email}</td>
+                    <td>${v.name}</td>
+                    <td>${v.pin}</td>
+                    <td>${v.created_at || 'N/A'}</td>
+                    <td>${v.expires_at || 'N/A'}</td>
+                    <td>${v.verified ? 'Yes' : 'No'}</td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    } catch (error) {
+        console.error('Error loading verifications:', error);
+        document.getElementById('verificationsTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load</td></tr>';
+    }
+}
+
+// ========== Load User Draws ==========
+async function loadUserDraws() {
+    try {
+        const res = await fetch(`/admin/user-draws?email=${encodeURIComponent(currentAdmin.email)}`);
+        if (!res.ok) throw new Error('Failed to load user draws');
+        const draws = await res.json();
+        const tbody = document.getElementById('userDrawsTableBody');
+        if (!draws.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No enrollments found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        draws.forEach(d => {
+            const row = `
+                <tr>
+                    <td>${d.user_email}</td>
+                    <td>${d.lucky_draw_id}</td>
+                    <td>Rs. ${d.user_pay}</td>
+                    <td>${d.status}</td>
+                    <td>${d.joined_at || 'N/A'}</td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    } catch (error) {
+        console.error('Error loading user draws:', error);
+        document.getElementById('userDrawsTableBody').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Failed to load</td></tr>';
+    }
+}
+
+
+// ========== Verification Management ==========
+async function updateVerification(verificationId, field, value) {
+    try {
+        const payload = { admin_email: currentAdmin.email };
+        payload[field] = value;
+        const res = await fetch(`/admin/verification/${verificationId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast(`Verification ${field} updated`, 'success');
+            loadVerifications(); // refresh table
+        } else {
+            showToast('Update failed', 'danger');
+        }
+    } catch (error) {
+        console.error(error);
+        showToast('Error updating verification', 'danger');
+    }
+}
+
+async function deleteVerification(verificationId) {
+    if (!confirm('Delete this verification record?')) return;
+    try {
+        const res = await fetch(`/admin/verification/${verificationId}?admin_email=${encodeURIComponent(currentAdmin.email)}`, {
+            method: 'DELETE'
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Verification deleted', 'success');
+            loadVerifications(); // refresh table
+        } else {
+            showToast(data.detail || 'Delete failed', 'danger');
+        }
+    } catch (error) {
+        console.error(error);
+        showToast('Error deleting verification', 'danger');
+    }
+}
+
+// Modify loadVerifications to include edit/delete buttons
+async function loadVerifications() {
+    try {
+        const res = await fetch(`/admin/verifications?email=${encodeURIComponent(currentAdmin.email)}`);
+        if (!res.ok) throw new Error('Failed to load verifications');
+        const vers = await res.json();
+        const tbody = document.getElementById('verificationsTableBody');
+        if (!vers.length) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">No verifications found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        vers.forEach(v => {
+            const row = `
+                <tr>
+                    <td>${v.email}</td>
+                    <td>${v.name}</td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm pin-input" value="${v.pin}" 
+                               data-id="${v.id}" style="width:100px; display:inline-block;">
+                        <button class="btn btn-sm btn-primary update-pin" data-id="${v.id}">Update</button>
+                    </td>
+                    <td>${v.created_at || 'N/A'}</td>
+                    <td>${v.expires_at || 'N/A'}</td>
+                    <td>
+                        <select class="form-select form-select-sm verified-select" data-id="${v.id}">
+                            <option value="true" ${v.verified ? 'selected' : ''}>Yes</option>
+                            <option value="false" ${!v.verified ? 'selected' : ''}>No</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-danger delete-verification" data-id="${v.id}">Delete</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+        // Attach event handlers
+        document.querySelectorAll('.update-pin').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.dataset.id;
+                const input = btn.parentElement.querySelector('.pin-input');
+                const newPin = input.value;
+                updateVerification(id, 'pin', newPin);
+            });
+        });
+        document.querySelectorAll('.verified-select').forEach(select => {
+            select.addEventListener('change', (e) => {
+                const id = select.dataset.id;
+                const newValue = select.value === 'true';
+                updateVerification(id, 'verified', newValue);
+            });
+        });
+        document.querySelectorAll('.delete-verification').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.dataset.id;
+                deleteVerification(id);
+            });
+        });
+    } catch (error) {
+        console.error('Error loading verifications:', error);
+        document.getElementById('verificationsTableBody').innerHTML = '<tr><td colspan="7" class="text-center text-danger">Failed to load</td></tr>';
+    }
+}
+
+// ========== User Draw Management ==========
+let allDrawsList = [];
+
+async function loadDrawsList() {
+    try {
+        const res = await fetch(`/admin/draws-list?admin_email=${encodeURIComponent(currentAdmin.email)}`);
+        if (!res.ok) throw new Error('Failed to load draws list');
+        allDrawsList = await res.json();
+    } catch (error) {
+        console.error('Error loading draws list:', error);
+    }
+}
+
+async function updateUserDraw(enrollmentId, field, value) {
+    try {
+        const payload = { admin_email: currentAdmin.email };
+        payload[field] = value;
+        const res = await fetch(`/admin/user-draw/${enrollmentId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Enrollment updated', 'success');
+            loadUserDraws();
+        } else {
+            showToast('Update failed', 'danger');
+        }
+    } catch (error) {
+        console.error(error);
+        showToast('Error updating enrollment', 'danger');
+    }
+}
+
+async function deleteUserDraw(enrollmentId) {
+    if (!confirm('Delete this enrollment?')) return;
+    try {
+        const res = await fetch(`/admin/user-draw/${enrollmentId}?admin_email=${encodeURIComponent(currentAdmin.email)}`, {
+            method: 'DELETE'
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Enrollment deleted', 'success');
+            loadUserDraws();
+        } else {
+            showToast('Delete failed', 'danger');
+        }
+    } catch (error) {
+        console.error(error);
+        showToast('Error deleting enrollment', 'danger');
+    }
+}
+
+// Modify loadUserDraws to include edit/delete and draw dropdown
+async function loadUserDraws() {
+    try {
+        await loadDrawsList(); // ensure dropdown options are ready
+        const res = await fetch(`/admin/user-draws?email=${encodeURIComponent(currentAdmin.email)}`);
+        if (!res.ok) throw new Error('Failed to load user draws');
+        const draws = await res.json();
+        const tbody = document.getElementById('userDrawsTableBody');
+        if (!draws.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No enrollments found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        draws.forEach(d => {
+            const statusOptions = ['open', 'pending', 'win', 'loss'];
+            const statusSelect = `<select class="form-select form-select-sm status-select" data-id="${d.id}">
+                ${statusOptions.map(opt => `<option value="${opt}" ${d.status === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+            </select>`;
+            const drawOptions = allDrawsList.map(draw => `<option value="${draw.id}" ${d.lucky_draw_id === draw.id ? 'selected' : ''}>${draw.title} (${draw.id})</option>`).join('');
+            const drawSelect = `<select class="form-select form-select-sm draw-select" data-id="${d.id}">
+                ${drawOptions}
+            </select>`;
+            const row = `
+                <tr>
+                    <td>${d.user_email}</td>
+                    <td>${drawSelect}</td>
+                    <td>Rs. ${d.user_pay}</td>
+                    <td>${statusSelect}</td>
+                    <td>${d.joined_at || 'N/A'}</td>
+                    <td><button class="btn btn-sm btn-danger delete-enrollment" data-id="${d.id}">Delete</button></td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+        // Attach event handlers
+        document.querySelectorAll('.status-select').forEach(select => {
+            select.addEventListener('change', (e) => {
+                const id = select.dataset.id;
+                updateUserDraw(id, 'status', select.value);
+            });
+        });
+        document.querySelectorAll('.draw-select').forEach(select => {
+            select.addEventListener('change', (e) => {
+                const id = select.dataset.id;
+                updateUserDraw(id, 'lucky_draw_id', select.value);
+            });
+        });
+        document.querySelectorAll('.delete-enrollment').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.dataset.id;
+                deleteUserDraw(id);
+            });
+        });
+    } catch (error) {
+        console.error('Error loading user draws:', error);
+        document.getElementById('userDrawsTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load</td></tr>';
+    }
+}
+
+// Also extend loadUsers to allow name editing (inline)
+async function loadUsers() {
+    try {
+        const res = await fetch(`/admin/users?email=${encodeURIComponent(currentAdmin.email)}`);
+        if (!res.ok) throw new Error('Failed to load users');
+        const users = await res.json();
+        const tbody = document.getElementById('usersTableBody');
+        if (!users.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No users found</td></tr>';
+            return;
+        }
+        tbody.innerHTML = '';
+        for (const user of users) {
+            // Get verification status
+            let verified = 'N/A';
+            try {
+                const verRes = await fetch(`/admin/verifications?email=${encodeURIComponent(currentAdmin.email)}`);
+                const vers = await verRes.json();
+                const userVer = vers.find(v => v.email === user.email);
+                verified = userVer ? (userVer.verified ? 'Yes' : 'No') : 'No';
+            } catch (e) { console.error(e); }
+            const row = `
+                <tr>
+                    <td>${user.id.substring(0, 8)}...</td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm user-name-input" value="${user.name}" data-id="${user.id}" style="width:150px;">
+                        <button class="btn btn-sm btn-primary update-name" data-id="${user.id}">Save</button>
+                    </td>
+                    <td>${user.email}</td>
+                    <td>
+                        <select class="form-select form-select-sm user-status-select" data-id="${user.id}">
+                            <option value="user" ${user.user_status === 'user' ? 'selected' : ''}>User</option>
+                            <option value="staff" ${user.user_status === 'staff' ? 'selected' : ''}>Staff</option>
+                        </select>
+                    </td>
+                    <td>${verified}</td>
+                    <td><button class="btn btn-sm btn-danger delete-user" data-id="${user.id}">Delete</button></td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        }
+        // Name update
+        document.querySelectorAll('.update-name').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const userId = btn.dataset.id;
+                const newName = btn.parentElement.querySelector('.user-name-input').value;
+                await updateUserField(userId, 'name', newName);
+            });
+        });
+        // Status update
+        document.querySelectorAll('.user-status-select').forEach(select => {
+            select.addEventListener('change', async (e) => {
+                const userId = select.dataset.id;
+                const newStatus = select.value;
+                await updateUserField(userId, 'user_status', newStatus);
+            });
+        });
+        // Delete user
+        document.querySelectorAll('.delete-user').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const userId = btn.dataset.id;
+                await deleteUser(userId);
+            });
+        });
+    } catch (error) {
+        console.error('Error loading users:', error);
+        document.getElementById('usersTableBody').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Failed to load users</td></tr>';
+    }
+}
+
+async function updateUserField(userId, field, value) {
+    try {
+        const payload = { admin_email: currentAdmin.email };
+        payload[field] = value;
+        const res = await fetch(`/admin/user/${userId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast(`User ${field} updated`, 'success');
+            loadUsers(); // refresh to show changes
+        } else {
+            showToast('Update failed', 'danger');
+        }
+    } catch (error) {
+        console.error(error);
+        showToast('Error updating user', 'danger');
+    }
 }

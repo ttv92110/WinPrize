@@ -26,6 +26,14 @@ templates = Jinja2Templates(directory=str(templates_dir))
 def generate_6digit_pin():
     return ''.join([str(random.randint(0, 9)) for _ in range(6)])
 
+def is_verified(record): 
+    verified_val = record.get("verified", False)
+    if isinstance(verified_val, bool):
+        return verified_val
+    elif isinstance(verified_val, str):
+        return verified_val.lower() == "true"
+    return False
+
 @router.post("/send-pin")
 async def send_verification_pin(request: Request, data: dict):
     try:
@@ -36,8 +44,7 @@ async def send_verification_pin(request: Request, data: dict):
         
         if not email or not name or not password:
             raise HTTPException(status_code=400, detail="Missing required fields")
-        
-        # Check if email already exists
+         
         existing_users = users_db.find_by_field("email", email)
         if existing_users:
             raise HTTPException(status_code=400, detail="Email already registered")
@@ -53,8 +60,7 @@ async def send_verification_pin(request: Request, data: dict):
                 except:
                     verifications_db.delete(ver["id"])
         
-        pin = generate_6digit_pin()
-        # یقینی بنائیں کہ PIN 6 digits کا ہے
+        pin = generate_6digit_pin() 
         pin = str(pin).zfill(6)
         created_at = datetime.now()
         expires_at = created_at + timedelta(minutes=20)
@@ -107,7 +113,19 @@ async def verify_pin(data: dict):
             raise HTTPException(status_code=400, detail="Email and PIN are required")
         
         verifications = verifications_db.find_by_field("email", email)
-        unverified = [v for v in verifications if str(v.get("verified", "")).lower() != "true" and v.get("verified") != True]
+        
+        # صرف unverified والے filter کریں (string "FALSE" کو بھی false سمجھیں)
+        unverified = []
+        for v in verifications:
+            verified_val = v.get("verified")
+            is_verified = False
+            if isinstance(verified_val, bool):
+                is_verified = verified_val
+            elif isinstance(verified_val, str):
+                is_verified = verified_val.lower() == "true"
+            
+            if not is_verified:
+                unverified.append(v)
         
         if not unverified:
             existing_users = users_db.find_by_field("email", email)
@@ -116,8 +134,7 @@ async def verify_pin(data: dict):
             raise HTTPException(status_code=400, detail="No pending verification found")
         
         verification = sorted(unverified, key=lambda x: x.get("created_at", ""), reverse=True)[0]
-        
-        # Check if expired
+         
         try:
             expires_at = datetime.strptime(verification["expires_at"], "%d/%m/%YT%Hh:%Mm:%Ss")
             if datetime.now() > expires_at:
@@ -130,12 +147,10 @@ async def verify_pin(data: dict):
             verifications_db.delete(verification["id"])
             raise HTTPException(status_code=400, detail="Too many failed attempts. Please request a new PIN.")
         
-        # ========== اہم تبدیلی: PIN comparison ==========
-        # دونوں کو string میں تبدیل کر کے compare کریں
+        # ========== اہم تبدیلی: PIN comparison ========== 
         db_pin = str(verification.get("pin", ""))
-        input_pin = str(pin).zfill(6)  # ← input کو بھی 6 digits میں تبدیل کریں
-
-        # اگر DB میں PIN 5 digits کا ہے تو اسے 6 digits میں تبدیل کریں
+        input_pin = str(pin).zfill(6)  
+        
         if len(db_pin) == 5:
             db_pin = "0" + db_pin
         elif len(db_pin) == 4:
@@ -146,8 +161,7 @@ async def verify_pin(data: dict):
             db_pin = "0000" + db_pin
         elif len(db_pin) == 1:
             db_pin = "00000" + db_pin
-
-        print(f"🔍 Comparing PIN: DB='{db_pin}' vs Input='{input_pin}'")
+        
 
         if db_pin != input_pin: 
             verification["attempts"] = verification.get("attempts", 0) + 1
@@ -155,8 +169,7 @@ async def verify_pin(data: dict):
             remaining = 5 - verification["attempts"]
             raise HTTPException(status_code=400, detail=f"Invalid PIN. {remaining} attempts remaining.")
         # =================================================
-        
-        # PIN is correct - create user account
+         
         user_data = {
             "id": str(uuid.uuid4()),
             "name": verification["name"],
@@ -168,18 +181,15 @@ async def verify_pin(data: dict):
         }
         
         users_db.insert(user_data) 
-        
-        # Mark verification as verified
+         
         verification["verified"] = True
         verification["verified_at"] = datetime.now().strftime("%d/%m/%YT%Hh:%Mm:%Ss")
         verifications_db.update(verification["id"], verification)
-        
-        # Delete old verifications
+         
         for v in unverified:
             if v["id"] != verification["id"]:
                 verifications_db.delete(v["id"])
-        
-        # Send welcome email
+         
         import asyncio
         asyncio.create_task(email_service.send_welcome_email(
             to_email=email,
@@ -208,17 +218,35 @@ async def resend_pin(data: dict):
         
         if not email:
             raise HTTPException(status_code=400, detail="Email is required")
+         
+        existing_users = users_db.find_by_field("email", email)
+        if existing_users: 
+            raise HTTPException(status_code=400, detail="Email already verified. Please login.")
         
-        verifications = verifications_db.find_by_field("email", email)
-        unverified = [v for v in verifications if not v.get("verified", False)]
+        verifications = verifications_db.find_by_field("email", email) 
+         
+        unverified = []
+        for v in verifications:
+            verified_val = v.get("verified") 
+            is_verified = False
+            if isinstance(verified_val, bool):
+                is_verified = verified_val
+            elif isinstance(verified_val, str):
+                is_verified = verified_val.lower() == "true"
+            else:
+                is_verified = False
+            
+            if not is_verified:
+                unverified.append(v)
         
         if not unverified:
-            raise HTTPException(status_code=400, detail="No pending verification found")
-        
+            raise HTTPException(status_code=400, detail="No pending verification found. Please register again.")
+         
         verification = unverified[0]
-        verifications_db.delete(verification["id"])
-        
-        pin = str(generate_6digit_pin())
+        verifications_db.delete(verification["id"]) 
+         
+        pin = generate_6digit_pin()
+        pin = str(pin).zfill(6)
         created_at = datetime.now()
         expires_at = created_at + timedelta(minutes=20)
         date_format = "%d/%m/%YT%Hh:%Mm:%Ss"
@@ -228,7 +256,7 @@ async def resend_pin(data: dict):
             "email": verification["email"],
             "name": verification["name"],
             "password": verification["password"],
-            "pin": str(pin).zfill(6),
+            "pin": pin,
             "created_at": created_at.strftime(date_format),
             "expires_at": expires_at.strftime(date_format),
             "verified": False,
@@ -236,28 +264,28 @@ async def resend_pin(data: dict):
             "user_status": verification.get("user_status", "user")
         }
         
-        verifications_db.insert(new_verification)
-        
+        verifications_db.insert(new_verification) 
+         
         email_sent = await email_service.send_verification_pin(
             to_email=email,
             user_name=verification["name"],
             pin=pin
         )
         
-        if email_sent:
+        if email_sent: 
             return {
                 "success": True,
                 "message": "New verification PIN sent to your email"
             }
         else:
-            verifications_db.delete(new_verification["id"])
+            verifications_db.delete(new_verification["id"]) 
             raise HTTPException(status_code=500, detail="Failed to send email")
             
     except HTTPException:
         raise
     except Exception as e: 
         raise HTTPException(status_code=500, detail=str(e))
-
+    
 @router.get("/check/{email}")
 async def check_verification_status(email: str):
     try:
