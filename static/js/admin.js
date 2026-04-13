@@ -70,7 +70,7 @@ async function loadAdminDraws() {
         const container = document.getElementById("adminDrawsContainer");
         if (!container) return;
 
-        container.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+        container.innerHTML = '<div class="loader-spinner"></div>';
 
         const res = await fetch(`/admin/draws?email=${encodeURIComponent(currentAdmin.email)}`);
 
@@ -515,7 +515,8 @@ async function createNewDraw() {
 
 function logout() {
     localStorage.removeItem("loggedUser");
-    window.location.href = "/";
+    window.location.href = "/"; 
+    window.location.reload();
 }
 
 function showToast(message, type = 'success') {
@@ -635,7 +636,7 @@ async function deleteVerification(verificationId) {
     }
 }
 
-// Modify loadVerifications to include edit/delete buttons
+// Modify  to include edit/delete buttons
 async function loadVerifications() {
     try {
         const res = await fetch(`/admin/verifications?email=${encodeURIComponent(currentAdmin.email)}`);
@@ -650,28 +651,28 @@ async function loadVerifications() {
         vers.forEach(v => {
             const row = `
                 <tr>
-                    <td>${v.email}</td>
-                    <td>${v.name}</td>
-                    <td>
-                        <input type="text" class="form-control form-control-sm pin-input" value="${v.pin}" 
-                               data-id="${v.id}" style="width:100px; display:inline-block;">
-                        <button class="btn btn-sm btn-primary update-pin" data-id="${v.id}">Update</button>
-                    </td>
-                    <td>${v.created_at || 'N/A'}</td>
-                    <td>${v.expires_at || 'N/A'}</td>
-                    <td>
-                        <select class="form-select form-select-sm verified-select" data-id="${v.id}">
-                            <option value="true" ${v.verified ? 'selected' : ''}>Yes</option>
-                            <option value="false" ${!v.verified ? 'selected' : ''}>No</option>
-                        </select>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-danger delete-verification" data-id="${v.id}">Delete</button>
-                    </td>
+                <td data-label="Email">${escapeHtml(v.email)}</td>
+                <td data-label="Name">${escapeHtml(v.name)}</td>
+                <td data-label="PIN">
+                    <input type="text" class="form-control form-control-sm pin-input" value="${v.pin}" data-id="${v.id}" style="width:100px; display:inline-block;">
+                    <button class="btn btn-sm btn-primary update-pin" data-id="${v.id}">Update</button>
+                </td>
+                <td data-label="Created">${v.created_at || 'N/A'}</td>
+                <td data-label="Expires">${v.expires_at || 'N/A'}</td>
+                <td data-label="Verified">
+                    <select class="form-select form-select-sm verified-select" data-id="${v.id}">
+                    <option value="true" ${v.verified ? 'selected' : ''}>Yes</option>
+                    <option value="false" ${!v.verified ? 'selected' : ''}>No</option>
+                    </select>
+                </td>
+                <td data-label="Actions">
+                    <button class="btn btn-sm btn-danger delete-verification" data-id="${v.id}">Delete</button>
+                </td>
                 </tr>
             `;
             tbody.innerHTML += row;
         });
+        attachVerificationEvents();
         // Attach event handlers
         document.querySelectorAll('.update-pin').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -754,10 +755,10 @@ async function deleteUserDraw(enrollmentId) {
     }
 }
 
-// Modify loadUserDraws to include edit/delete and draw dropdown
+// Modify  to include edit/delete and draw dropdown
 async function loadUserDraws() {
     try {
-        await loadDrawsList(); // ensure dropdown options are ready
+        await loadDrawsList();
         const res = await fetch(`/admin/user-draws?email=${encodeURIComponent(currentAdmin.email)}`);
         if (!res.ok) throw new Error('Failed to load user draws');
         const draws = await res.json();
@@ -770,24 +771,23 @@ async function loadUserDraws() {
         draws.forEach(d => {
             const statusOptions = ['open', 'pending', 'win', 'loss'];
             const statusSelect = `<select class="form-select form-select-sm status-select" data-id="${d.id}">
-                ${statusOptions.map(opt => `<option value="${opt}" ${d.status === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-            </select>`;
+        ${statusOptions.map(opt => `<option value="${opt}" ${d.status === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+      </select>`;
             const drawOptions = allDrawsList.map(draw => `<option value="${draw.id}" ${d.lucky_draw_id === draw.id ? 'selected' : ''}>${draw.title} (${draw.id})</option>`).join('');
-            const drawSelect = `<select class="form-select form-select-sm draw-select" data-id="${d.id}">
-                ${drawOptions}
-            </select>`;
+            const drawSelect = `<select class="form-select form-select-sm draw-select" data-id="${d.id}">${drawOptions}</select>`;
             const row = `
-                <tr>
-                    <td>${d.user_email}</td>
-                    <td>${drawSelect}</td>
-                    <td>Rs. ${d.user_pay}</td>
-                    <td>${statusSelect}</td>
-                    <td>${d.joined_at || 'N/A'}</td>
-                    <td><button class="btn btn-sm btn-danger delete-enrollment" data-id="${d.id}">Delete</button></td>
-                </tr>
-            `;
+        <tr>
+          <td data-label="User Email">${escapeHtml(d.user_email)}</td>
+          <td data-label="Draw ID">${drawSelect}</td>
+          <td data-label="Amount">Rs. ${d.user_pay}</td>
+          <td data-label="Status">${statusSelect}</td>
+          <td data-label="Joined At">${d.joined_at || 'N/A'}</td>
+          <td data-label="Actions"><button class="btn btn-sm btn-danger delete-enrollment" data-id="${d.id}">Delete</button></td>
+        </tr>
+      `;
             tbody.innerHTML += row;
         });
+        attachUserDrawEvents();
         // Attach event handlers
         document.querySelectorAll('.status-select').forEach(select => {
             select.addEventListener('change', (e) => {
@@ -836,29 +836,29 @@ async function loadUsers() {
             } catch (e) { console.error(e); }
             const row = `
                 <tr>
-                    <td>${user.id.substring(0, 8)}...</td>
-                    <td>
-                        <input type="text" class="form-control form-control-sm user-name-input" value="${escapeHtml(user.name)}" data-id="${user.id}" style="width:150px;">
-                        <button class="btn btn-sm btn-primary update-name" data-id="${user.id}">Save</button>
-                     </td>
-                    <td>${escapeHtml(user.email)}</td>
-                    <td>
-                        <select class="form-select form-select-sm user-status-select" data-id="${user.id}">
-                            <option value="user" ${user.user_status === 'user' ? 'selected' : ''}>User</option>
-                            <option value="staff" ${user.user_status === 'staff' ? 'selected' : ''}>Staff</option>
-                        </select>
-                     </td>
-                    <td>
-                        <select class="form-select form-select-sm user-verified-select" data-email="${user.email}">
-                            <option value="true" ${verified === 'Yes' ? 'selected' : ''}>Yes</option>
-                            <option value="false" ${verified === 'No' ? 'selected' : ''}>No</option>
-                        </select>
-                     </td>
-                    <td>
-                        <button class="btn btn-sm btn-danger delete-user" data-id="${user.id}">Delete</button>
-                     </td>
-                 </tr>
-            `;
+                    <td data-label="ID">${user.id.substring(0, 8)}...</td>
+                    <td data-label="Name">
+                    <input type="text" class="form-control form-control-sm user-name-input" value="${escapeHtml(user.name)}" data-id="${user.id}" style="width:150px;">
+                    <button class="btn btn-sm btn-primary update-name" data-id="${user.id}">Save</button>
+                    </td>
+                    <td data-label="Email">${escapeHtml(user.email)}</td>
+                    <td data-label="Status">
+                    <select class="form-select form-select-sm user-status-select" data-id="${user.id}">
+                        <option value="user" ${user.user_status === 'user' ? 'selected' : ''}>User</option>
+                        <option value="staff" ${user.user_status === 'staff' ? 'selected' : ''}>Staff</option>
+                    </select>
+                    </td>
+                    <td data-label="Verified">
+                    <select class="form-select form-select-sm user-verified-select" data-email="${user.email}">
+                        <option value="true" ${verified === 'Yes' ? 'selected' : ''}>Yes</option>
+                        <option value="false" ${verified === 'No' ? 'selected' : ''}>No</option>
+                    </select>
+                    </td>
+                    <td data-label="Actions">
+                    <button class="btn btn-sm btn-danger delete-user" data-id="${user.id}">Delete</button>
+                    </td>
+                </tr>
+                `;
             tbody.innerHTML += row;
         }
         // Name update
@@ -991,23 +991,22 @@ async function loadAllPayments() {
         payments.forEach(p => {
             const statusOptions = ['pending', 'paid', 'cancel'];
             const statusSelect = `<select class="form-select form-select-sm payment-status-select" data-id="${p.id}">
-                ${statusOptions.map(opt => `<option value="${opt}" ${p.status === opt ? 'selected' : ''}>${opt}</option>`).join('')}
-            </select>`;
+        ${statusOptions.map(opt => `<option value="${opt}" ${p.status === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+      </select>`;
             const row = `
-                <tr>
-                    <td>${escapeHtml(p.user_email)}<br><small>${escapeHtml(p.user_name || '')}</small></td>
-                    <td>${p.lucky_draw_title || p.lucky_draw_id}</td>
-                    <td>Rs. ${p.amount}</td>
-                    <td>${statusSelect}</td>
-                    <td>${p.transaction_id || 'N/A'}</td>
-                    <td>${formatDate(p.created_at)}</td>
-                    <td>
-                        <button class="btn btn-sm btn-danger delete-payment" data-id="${p.id}">Delete</button>
-                    </td>
-                </tr>
-            `;
+        <tr>
+          <td data-label="User">${escapeHtml(p.user_email)}<br><small>${escapeHtml(p.user_name || '')}</small></td>
+          <td data-label="Draw">${p.lucky_draw_title || p.lucky_draw_id}</td>
+          <td data-label="Amount">Rs. ${p.amount}</td>
+          <td data-label="Status">${statusSelect}</td>
+          <td data-label="Transaction ID">${p.transaction_id || 'N/A'}</td>
+          <td data-label="Date">${formatDate(p.created_at)}</td>
+          <td data-label="Actions"><button class="btn btn-sm btn-danger delete-payment" data-id="${p.id}">Delete</button></td>
+        </tr>
+      `;
             tbody.innerHTML += row;
         });
+        attachPaymentEvents();
         // Attach event handlers
         document.querySelectorAll('.payment-status-select').forEach(select => {
             select.addEventListener('change', async (e) => {

@@ -149,20 +149,22 @@ async function login() {
             // ======================================================
 
             // Show success message
-            showToast("Login successful! Welcome back!", "success");
+            showToast("Login successful! Welcome back!", "success"); 
 
             // Update UI
             updateUserMenu();
 
             // Clear form
-            document.getElementById("loginForm").reset();
-
+            document.getElementById("loginForm").reset(); 
             // If user is admin, show a special message
             if (userData.user_status === 'staff') {
                 setTimeout(() => {
-                    showToast("You have admin privileges", "info");
-                }, 500);
+                    showToast("You have admin privileges", "info"); 
+                    window.location.href = "/#draws?reload=" + Date.now();  // forces fresh load 
+                }, 500); 
             }
+            window.location.href = "/#draws";
+            window.location.reload();  
         } else {
             showToast(data.message || "Invalid email or password", "danger");
         }
@@ -405,6 +407,8 @@ function logout() {
     const notificationBell = document.getElementById('notificationBell');
     if (notificationBell) notificationBell.style.display = 'none';
 
+    window.location.href = "/";
+    window.location.reload();          // extra guarantee
     showToast("Logged out successfully", "info");
 }
 

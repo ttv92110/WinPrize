@@ -29,30 +29,17 @@ async function loadDraws() {
     // =================================
 
     try {
-        let res = await fetch("/draws/");
-        let draws = await res.json();
+        // ایک ہی request میں تمام ڈیٹا لے آئیں
+        let res = await fetch("/draws/batch-data");
+        let drawsData = await res.json();
         let user = JSON.parse(localStorage.getItem("loggedUser"));
 
-        if (draws.length === 0) {
+        if (drawsData.length === 0) {
             container.innerHTML = '<div class="col-12 text-center"><h3>No active draws available</h3></div>';
             return;
         }
 
-        // Get participant counts for all draws
-        const participantCounts = {};
-        for (const draw of draws) {
-            if (draw.visible) {
-                try {
-                    const countRes = await fetch(`/draws/participants/count/${draw.id}`);
-                    const countData = await countRes.json();
-                    participantCounts[draw.id] = countData.participants;
-                } catch (error) {
-                    participantCounts[draw.id] = Math.floor(Math.random() * 50) + 10;
-                }
-            }
-        }
-
-        // Check which draws user has joined
+        // Check joined draws for user
         const joinedDraws = {};
         if (user) {
             try {
@@ -66,124 +53,98 @@ async function loadDraws() {
             }
         }
 
-        // Clear container and build cards
         container.innerHTML = "";
 
-        for (let i = 0; i < draws.length; i++) {
-            const draw = draws[i];
-            if (draw.visible) {
-                let timeIcon = draw.time_interval === 'day' ? 'fa-sun' :
-                    draw.time_interval === 'week' ? 'fa-calendar-week' : 'fa-calendar-alt';
+        for (let i = 0; i < drawsData.length; i++) {
+            const draw = drawsData[i];
+            let timeIcon = draw.time_interval === 'day' ? 'fa-sun' :
+                draw.time_interval === 'week' ? 'fa-calendar-week' : 'fa-calendar-alt';
 
-                let timeLeft = "Loading...";
-                let timeStatus = "";
-                let resultMessage = "";
+            let badgeClass = 'bg-success';
+            let badgeIcon = 'fa-bolt';
+            let badgeText = 'LIVE';
 
-                try {
-                    const timeRes = await fetch(`/draws/time-left/${draw.id}`);
-                    const timeData = await timeRes.json();
-                    timeLeft = timeData.time_left;
-                    timeStatus = timeData.status || draw.status;
-                    resultMessage = timeData.result_message || "";
-                } catch (error) {
-                    console.error("Error fetching time left:", error);
-                    timeLeft = "Unknown";
-                }
+            if (draw.status === 'completed') {
+                badgeClass = 'bg-primary';
+                badgeIcon = 'fa-check-circle';
+                badgeText = 'COMPLETED';
+            } else if (draw.status === 'awaiting') {
+                badgeClass = 'bg-warning text-dark';
+                badgeIcon = 'fa-clock';
+                badgeText = 'AWAITING';
+            } else if (draw.status === 'finished') {
+                badgeClass = 'bg-secondary';
+                badgeIcon = 'fa-flag';
+                badgeText = 'FINISHED';
+            }
 
-                let badgeClass = 'bg-success';
-                let badgeIcon = 'fa-bolt';
-                let badgeText = 'LIVE';
+            const userJoined = joinedDraws[draw.id];
 
-                if (draw.status === 'completed') {
-                    badgeClass = 'bg-primary';
-                    badgeIcon = 'fa-check-circle';
-                    badgeText = 'COMPLETED';
-                } else if (draw.status === 'awaiting') {
-                    badgeClass = 'bg-warning text-dark';
-                    badgeIcon = 'fa-clock';
-                    badgeText = 'AWAITING';
-                } else if (draw.status === 'finished') {
-                    badgeClass = 'bg-secondary';
-                    badgeIcon = 'fa-flag';
-                    badgeText = 'FINISHED';
-                }
-
-                const participantsCount = participantCounts[draw.id] || 0;
-                const userJoined = joinedDraws[draw.id];
-
-                let card = `<div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="${i * 100}">
-                    <div class="draw-card ${draw.status !== 'open' ? 'completed-draw' : ''}">
-                        <div class="card-badge ${badgeClass}">
-                            <i class="fas ${badgeIcon} me-1"></i>
-                            ${badgeText}
+            let card = `<div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="${i * 100}">
+                <div class="draw-card ${draw.status !== 'open' ? 'completed-draw' : ''}">
+                    <div class="card-badge ${badgeClass}">
+                        <i class="fas ${badgeIcon} me-1"></i>
+                        ${badgeText}
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <span class="time-badge">
+                                <i class="fas ${timeIcon} me-2"></i>
+                                ${draw.time_interval.charAt(0).toUpperCase() + draw.time_interval.slice(1)}ly Draw
+                            </span>
                         </div>
-                        <div class="card-body">
-                            <div class="text-center mb-3">
-                                <span class="time-badge">
-                                    <i class="fas ${timeIcon} me-2"></i>
-                                    ${draw.time_interval.charAt(0).toUpperCase() + draw.time_interval.slice(1)}ly Draw
+                        <h5 class="text-center mb-2">${draw.title || ''}</h5>
+                        <div class="price-tag text-center">
+                            <small class="text-muted">Entry Fee</small>
+                            <div>
+                                <span class="display-6 fw-bold">Rs. ${draw.user_pay}</span>
+                            </div>
+                        </div>
+                        <div class="prize-section text-center my-4">
+                            <small class="text-muted">Winning Prize Pool</small>
+                            <div class="prize-amount">
+                                <span class="display-5 fw-bold text-success">Rs. ${draw.winner_get}</span>
+                            </div>
+                        </div>
+                        <div class="draw-stats d-flex justify-content-around mb-4">
+                            <div class="text-center">
+                                <small class="text-muted d-block">Entries</small>
+                                <span class="fw-bold">${draw.participants_count}</span>
+                            </div>
+                            <div class="text-center">
+                                <small class="text-muted d-block">Time Left</small>
+                                <span class="fw-bold ${draw.time_left === 'Ended' ? 'text-danger' : 'text-primary'}">
+                                    <i class="fas fa-clock me-1"></i>
+                                    ${draw.time_left}
                                 </span>
                             </div>
-                            
-                            <h5 class="text-center mb-2">${draw.title || ''}</h5>
-                            
-                            <div class="price-tag text-center">
-                                <small class="text-muted">Entry Fee</small>
-                                <div>
-                                    <span class="display-6 fw-bold">Rs. ${draw.user_pay}</span>
-                                </div>
-                            </div>
-                            
-                            <div class="prize-section text-center my-4">
-                                <small class="text-muted">Winning Prize Pool</small>
-                                <div class="prize-amount">
-                                    <span class="display-5 fw-bold text-success">Rs. ${draw.winner_get}</span>
-                                </div>
-                            </div>
-                            
-                            <div class="draw-stats d-flex justify-content-around mb-4">
-                                <div class="text-center">
-                                    <small class="text-muted d-block">Entries</small>
-                                    <span class="fw-bold">${participantsCount}</span>
-                                </div>
-                                <div class="text-center">
-                                    <small class="text-muted d-block">Time Left</small>
-                                    <span class="fw-bold ${timeLeft === 'Ended' ? 'text-danger' : 'text-primary'}">
-                                        <i class="fas fa-clock me-1"></i>
-                                        ${timeLeft}
-                                    </span>
-                                </div>
-                            </div>`;
+                        </div>`;
 
-                if (resultMessage) {
+            if (draw.result_message) {
                     card += `<div class="text-center mb-3">
                         <small class="text-warning fw-bold">
                             <i class="fas fa-hourglass-half me-1"></i>
-                            ${resultMessage}
+                            ${draw.result_message}
                         </small>
                     </div>`;
                 }
 
                 if (draw.status === 'completed') {
                     card += `<button onclick="viewResult('${draw.id}')" class="btn-result">
-                                <i class="fas fa-trophy me-2"></i>
-                                View Result
+                                <i class="fas fa-trophy me-2"></i>View Result
                             </button>`;
                 } else if (draw.status === 'awaiting') {
                     card += `<div class="awaiting-status text-center">
                                 <span class="badge bg-warning text-dark p-3 w-100">
-                                    <i class="fas fa-hourglass-half me-2"></i>
-                                    Awaiting Result Announcement
+                                    <i class="fas fa-hourglass-half me-2"></i>Awaiting Result Announcement
                                 </span>
                             </div>`;
                 } else if (userJoined) {
                     const status = userJoined.status === "win" ? "You won! 🎉" :
-                        userJoined.status === "loss" ? "You lost 😢" :
-                            "You've joined";
+                        userJoined.status === "loss" ? "You lost 😢" : "You've joined";
                     card += `<div class="joined-status text-center">
                                 <span class="badge bg-info p-3 w-100">
-                                    <i class="fas fa-check-circle me-2"></i>
-                                    ${status}
+                                    <i class="fas fa-check-circle me-2"></i>${status}
                                 </span>
                             </div>`;
                 } else if (draw.status === 'open') {
@@ -198,15 +159,14 @@ async function loadDraws() {
                 card += `   <div class="mt-3 text-center">
                                 <small class="text-muted">
                                     <i class="fas fa-users me-1"></i>
-                                    ${participantsCount} people joined
+                                    ${draw.participants_count} people joined
                                 </small>
                             </div>
                         </div>
                     </div>
                 </div>`;
 
-                container.innerHTML += card;
-            }
+            container.innerHTML += card;
         }
     } catch (error) {
         console.error("Error loading draws:", error);

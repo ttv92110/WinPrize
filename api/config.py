@@ -27,8 +27,6 @@ class Config:
     NOTIFICATIONS_FILE = DATA_DIR / "notifications.json"   
     
     # App settings
-    
-    # App settings
     APP_NAME = "Win Prize"
     DEBUG = os.getenv("DEBUG", "False").lower() == "true"
     SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here-change-in-production")

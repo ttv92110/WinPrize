@@ -159,22 +159,34 @@ async def sync_to_sheets(request: Request):
         "message": "Data synced to Google Sheets",
         "records": results
     }
+
 # This is for Vercel serverless
 @app.get("/api")
 async def root():
     return {"message": "Win Prize API"}
 
-@app.get("/debug/email-config")
-async def debug_email_config():
-    """Check email configuration (safe version)"""
-    from api.utils.email import EmailService
-    email_service = EmailService()
-    return {
-        "smtp_host": email_service.smtp_host,
-        "smtp_port": email_service.smtp_port,
-        "smtp_user": email_service.smtp_user,
-        "from_email": email_service.from_email,
-        "from_name": email_service.from_name,
-        "smtp_password_set": "yes" if email_service.smtp_password else "no"
-    }
+# @app.get("/debug/email-config")
+# async def debug_email_config():
+#     """Check email configuration (safe version)"""
+#     from api.utils.email import EmailService
+#     email_service = EmailService()
+#     return {
+#         "smtp_host": email_service.smtp_host,
+#         "smtp_port": email_service.smtp_port,
+#         "smtp_user": email_service.smtp_user,
+#         "from_email": email_service.from_email,
+#         "from_name": email_service.from_name,
+#         "smtp_password_set": "yes" if email_service.smtp_password else "no"
+#     }
 
+# @app.get("/debug/routes")
+# async def list_routes():
+#     routes = []
+#     for route in app.routes:
+#         route_info = {"path": route.path}
+#         if hasattr(route, "methods"):
+#             route_info["methods"] = list(route.methods)
+#         else:
+#             route_info["methods"] = ["MOUNT"]  # for StaticFiles mounts
+#         routes.append(route_info)
+#     return routes

@@ -37,13 +37,6 @@ async def get_draws():
     # Only return visible draws
     return [d for d in draws if d.get("visible", False)]
 
-@router.get("/{draw_id}")
-async def get_draw(draw_id: str):
-    draw = lucky_db.find_by_id(draw_id)
-    if not draw:
-        raise HTTPException(status_code=404, detail="Draw not found")
-    return draw
-
 @router.get("/participants/count/{draw_id}")
 async def get_participants_count(draw_id: str):
     """Get number of participants in a draw"""
@@ -212,6 +205,79 @@ async def check_user_joined(email: str, draw_id: str):
                 and e.get("lucky_draw_id") == draw_id)
     return {"joined": joined}
 
+@router.get("/batch-data")
+async def get_batch_data():
+    """ایک ہی request میں تمام draws کے participants count اور time-left واپس کریں"""
+    draws = lucky_db.read_all()
+    current_time = datetime.now()
+    
+    result = []
+    for draw in draws:
+        if not draw.get("visible", False):
+            continue
+        
+        # participants count
+        all_entries = user_draws_db.read_all()
+        participants_count = len([e for e in all_entries if e.get("lucky_draw_id") == draw["id"]])
+        
+        # time-left
+        time_left = "Unknown"
+        result_message = ""
+        if draw.get("closed_at"):
+            try:
+                closed_time = datetime.strptime(draw["closed_at"], "%d/%m/%YT%Hh:%Mm:%Ss")
+                if current_time > closed_time:
+                    time_left = "Ended"
+                else:
+                    diff = closed_time - current_time
+                    days = diff.days
+                    hours = diff.seconds // 3600
+                    minutes = (diff.seconds % 3600) // 60
+                    if days > 0:
+                        time_left = f"{days}d {hours}h"
+                    elif hours > 0:
+                        time_left = f"{hours}h {minutes}m"
+                    else:
+                        time_left = f"{minutes}m"
+                    
+                    time_interval = draw.get("time_interval", "")
+                    if time_interval == "1hour" and minutes <= 10:
+                        result_message = "Result in next 10 minutes!"
+                    elif time_interval == "12hours" and hours <= 1:
+                        result_message = "Result in next hour!"
+                    elif time_interval == "day" and hours <= 1:
+                        result_message = "Result in next hour!"
+                    elif time_interval in ["10days", "15days", "month"] and days <= 1:
+                        result_message = "Result tomorrow!"
+                    elif time_interval in ["3months", "6months"] and days <= 1:
+                        result_message = "Result tomorrow!"
+                    elif time_interval == "1year" and days <= 30:
+                        result_message = "Result next month!"
+            except:
+                pass
+        
+        result.append({
+            "id": draw["id"],
+            "title": draw.get("title", ""),
+            "user_pay": draw["user_pay"],
+            "winner_get": draw["winner_get"],
+            "time_interval": draw["time_interval"],
+            "status": draw["status"],
+            "participants_count": participants_count,
+            "time_left": time_left,
+            "result_message": result_message
+        })
+    
+    return result
+
+
+@router.get("/{draw_id}")
+async def get_draw(draw_id: str):
+    draw = lucky_db.find_by_id(draw_id)
+    if not draw:
+        raise HTTPException(status_code=404, detail="Draw not found")
+    return draw
+
 @router.get("/participants/list/{draw_id}")
 async def get_draw_participants(draw_id: str, request: Request):
     """Get list of participants for a draw (admin only)"""
@@ -243,4 +309,3 @@ async def get_draw_participants(draw_id: str, request: Request):
     except Exception as e:
         print(f"Error getting participants: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-    

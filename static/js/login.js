@@ -12,6 +12,7 @@ async function login() {
     if (data.success) {
         localStorage.setItem("loggedUser", JSON.stringify(data.user));
         window.location.href = "/";
+        window.location.reload();       // extra guarantee
     } else {
         alert(data.message);
     }
@@ -29,6 +30,7 @@ async function login() {
     if (data.success) {
         localStorage.setItem("loggedUser", JSON.stringify(data.user));
         window.location.href = "/";
+        window.location.reload();       // extra guarantee
     } else {
         alert(data.message);
     }

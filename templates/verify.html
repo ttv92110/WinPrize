@@ -419,8 +419,8 @@
                     
                     // Redirect to home
                     setTimeout(() => {
-                        window.location.href = "/";
-                    }, 2000);
+                        window.location.href = "/#draws?reload=" + Date.now();  // forces fresh load
+                    }, 1000);
                 } else {
                     showError(data.detail || "Invalid PIN");
                     verifyBtn.disabled = false;

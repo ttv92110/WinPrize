@@ -12,4 +12,5 @@ async function signup() {
     let data = await res.json();
     alert(data.message);
     window.location.href = "/";
+    window.location.reload();       // extra guarantee
 }

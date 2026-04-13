@@ -6,17 +6,22 @@ import uuid
 from datetime import datetime
 import json
 import os 
+import time
+from functools import lru_cache 
 
 class GoogleSheetsDB:
-    """Google Sheets based database"""
-    
     def __init__(self, sheet_name: str, worksheet_name: str):
         self.sheet_name = sheet_name
         self.worksheet_name = worksheet_name
         self._client = None
         self._worksheet = None
+        self._cache = {}  # سادہ caching
+        self._cache_expiry = 5  # 5 سیکنڈ تک cache رکھیں
         self._init_client()
-         
+        
+    def _get_cache_key(self, method: str, *args, **kwargs) -> str:
+        return f"{self.sheet_name}:{self.worksheet_name}:{method}:{str(args)}:{str(kwargs)}"
+    
     def _init_client(self):
         """Initialize Google Sheets client from environment variable or file"""
         try:
@@ -70,17 +75,54 @@ class GoogleSheetsDB:
         except Exception as e:
             print(f"Error ensuring headers: {str(e)}")
     
-    def read_all(self) -> List[Dict]: 
+    def read_all(self, force_refresh=False) -> List[Dict]:
         if not self._worksheet:
             return []
         
+        cache_key = self._get_cache_key("read_all")
+        now = time.time()
+        
+        if not force_refresh and cache_key in self._cache:
+            data, timestamp = self._cache[cache_key]
+            if now - timestamp < self._cache_expiry:
+                return data
+        
         try:
             records = self._worksheet.get_all_records()
-            return [dict(record) for record in records]
+            data = [dict(record) for record in records]
+            self._cache[cache_key] = (data, now)
+            return data
         except Exception as e:
             print(f"Error reading from Google Sheets: {str(e)}")
+            # اگر quota exceed ہو تو cached data return کریں
+            if cache_key in self._cache:
+                print("⚠️ Using cached data due to API error")
+                return self._cache[cache_key][0]
             return []
     
+    def find_by_id(self, id: str, force_refresh=False) -> Optional[Dict]:
+        all_records = self.read_all(force_refresh)
+        for record in all_records:
+            if record.get("id") == id:
+                return record
+        return None
+
+    def find_by_field(self, field: str, value: Any, force_refresh=False) -> List[Dict]:
+        all_records = self.read_all(force_refresh)
+        search_value = str(value).lower().strip()
+        result = []
+        for r in all_records:
+            record_value = None
+            for key in r.keys():
+                if key.lower() == field.lower():
+                    record_value = r.get(key, "")
+                    break
+            if record_value is None:
+                record_value = r.get(field, "")
+            if str(record_value).lower().strip() == search_value:
+                result.append(r)
+        return result
+
     def insert(self, record: Dict) -> Dict:
         """Insert a new record"""
         if not self._worksheet:
@@ -111,53 +153,12 @@ class GoogleSheetsDB:
             
             # Append row
             self._worksheet.append_row(row_data)
+            self._cache.clear()
             return record
         except Exception as e:
             print(f"Error inserting into Google Sheets: {str(e)}")
             return record
-    
-    def find_by_id(self, id: str) -> Optional[Dict]: 
-        if not self._worksheet:
-            return None
-        
-        try:
-            all_records = self.read_all()
-            for record in all_records:
-                if record.get("id") == id:
-                    return record
-            return None
-        except Exception as e:
-            print(f"Error finding by ID: {str(e)}")
-            return None
-    
-    def find_by_field(self, field: str, value: Any) -> List[Dict]: 
-        if not self._worksheet:
-            return []
-        
-        try:
-            all_records = self.read_all()
-            result = []
-            search_value = str(value).lower().strip()
-            
-            for r in all_records:
-                # Check multiple possible field name variations
-                record_value = None
-                for key in r.keys():
-                    if key.lower() == field.lower():
-                        record_value = r.get(key, "")
-                        break
-                
-                if record_value is None:
-                    record_value = r.get(field, "")
-                
-                if str(record_value).lower().strip() == search_value:
-                    result.append(r)
-             
-            return result
-        except Exception as e:
-            print(f"Error finding by field: {str(e)}")
-            return []
-    
+ 
     def update(self, id: str, updates: Dict) -> Optional[Dict]:
         """Update a record by ID"""
         if not self._worksheet:
@@ -188,6 +189,7 @@ class GoogleSheetsDB:
                     value = str(record.get(header, ""))
                     self._worksheet.update_cell(row_index, col_idx, value)
                 
+                self._cache.clear()
                 return record
             return None
         except Exception as e:
@@ -201,6 +203,7 @@ class GoogleSheetsDB:
             for idx, record in enumerate(all_records, start=2):
                 if record.get("id") == id:
                     self._worksheet.delete_rows(idx)
+                    self._cache.clear()
                     return True
             return False
         except Exception as e:

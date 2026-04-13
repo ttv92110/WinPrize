@@ -112,7 +112,8 @@ async function updateNotificationBadge() {
 // Logout function
 function logout() {
     localStorage.removeItem("loggedUser");
-    window.location.href = "/";
+    window.location.href = "/"; 
+    window.location.reload();
 }
 
 // Show toast function
@@ -186,4 +187,7 @@ function logout() {
     updateUserMenu();
     updateAdminNavLink(); // Add this line
     showToast("Logged out successfully", "info");
+
+    window.location.href = "/";
+    window.location.reload();
 }

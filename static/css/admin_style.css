@@ -1,0 +1,87 @@
+  /* ========== Modern Admin Styling ========== */
+  .admin-card {
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+  }
+  .admin-card:hover {
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+  }
+  .card-header {
+    border-bottom: none;
+    padding: 1rem 1.5rem;
+  }
+  .table-responsive {
+    border-radius: 16px;
+  }
+  .admin-table {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+  }
+  .admin-table thead th {
+    background: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+    color: #495057;
+    padding: 1rem;
+  }
+  .admin-table tbody td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .admin-table tbody tr:hover {
+    background-color: #f8f9fa;
+    transition: 0.2s;
+  }
+  /* Modern badges */
+  .badge-status {
+    padding: 5px 12px;
+    border-radius: 30px;
+    font-weight: 500;
+    font-size: 0.7rem;
+    display: inline-block;
+  }
+  .badge-open { background: #d4edda; color: #155724; }
+  .badge-awaiting { background: #fff3cd; color: #856404; }
+  .badge-completed { background: #cce5ff; color: #004085; }
+  .badge-pending { background: #ffe5b4; color: #856404; }
+  .badge-paid { background: #d4edda; color: #155724; }
+  .badge-cancel { background: #f8d7da; color: #721c24; }
+  /* Action buttons */
+  .btn-action {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.7rem;
+    border-radius: 12px;
+    margin: 0 2px;
+  }
+  /* Elegant spinner */
+  .loader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e9ecef;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 2rem auto;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  /* Responsive tables – horizontal scroll on mobile */
+  @media (max-width: 768px) {
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .admin-table {
+      min-width: 600px;
+    }
+  }
+  
