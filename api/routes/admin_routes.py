@@ -710,6 +710,7 @@ async def delete_user_by_admin(user_id: str, request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ========== Admin: Verification Management ==========
+
 @router.put("/verification/{verification_id}")
 async def update_verification(verification_id: str, request: Request):
     """Update verification (PIN, verified status) - admin only"""

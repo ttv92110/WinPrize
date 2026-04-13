@@ -205,6 +205,39 @@ async def check_user_joined(email: str, draw_id: str):
                 and e.get("lucky_draw_id") == draw_id)
     return {"joined": joined}
 
+
+@router.get("/participants/list/{draw_id}")
+async def get_draw_participants(draw_id: str, request: Request):
+    """Get list of participants for a draw (admin only)"""
+    try:
+        user_email = request.query_params.get("email")
+        
+        # Verify admin
+        from api.routes.admin_routes import is_admin
+        if not is_admin(user_email):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        
+        # Get all enrollments for this draw
+        all_entries = user_draws_db.read_all()
+        draw_entries = [e for e in all_entries if e.get("lucky_draw_id") == draw_id]
+        
+        # Get user details for each participant
+        participants = []
+        for entry in draw_entries:
+            user_info = users_db.find_by_field("email", entry["user_email"])
+            if user_info:
+                participants.append({
+                    "email": entry["user_email"],
+                    "name": user_info[0].get("name", "Anonymous"),
+                    "joined_at": entry.get("joined_at", ""),
+                    "status": entry.get("status", "")
+                })
+        
+        return {"participants": participants, "count": len(participants)}
+    except Exception as e:
+        print(f"Error getting participants: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/batch-data")
 async def get_batch_data():
     """ایک ہی request میں تمام draws کے participants count اور time-left واپس کریں"""
@@ -270,42 +303,10 @@ async def get_batch_data():
     
     return result
 
-
 @router.get("/{draw_id}")
 async def get_draw(draw_id: str):
     draw = lucky_db.find_by_id(draw_id)
     if not draw:
         raise HTTPException(status_code=404, detail="Draw not found")
     return draw
-
-@router.get("/participants/list/{draw_id}")
-async def get_draw_participants(draw_id: str, request: Request):
-    """Get list of participants for a draw (admin only)"""
-    try:
-        user_email = request.query_params.get("email")
-        
-        # Verify admin
-        from api.routes.admin_routes import is_admin
-        if not is_admin(user_email):
-            raise HTTPException(status_code=403, detail="Admin access required")
-        
-        # Get all enrollments for this draw
-        all_entries = user_draws_db.read_all()
-        draw_entries = [e for e in all_entries if e.get("lucky_draw_id") == draw_id]
-        
-        # Get user details for each participant
-        participants = []
-        for entry in draw_entries:
-            user_info = users_db.find_by_field("email", entry["user_email"])
-            if user_info:
-                participants.append({
-                    "email": entry["user_email"],
-                    "name": user_info[0].get("name", "Anonymous"),
-                    "joined_at": entry.get("joined_at", ""),
-                    "status": entry.get("status", "")
-                })
-        
-        return {"participants": participants, "count": len(participants)}
-    except Exception as e:
-        print(f"Error getting participants: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+ 

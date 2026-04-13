@@ -672,7 +672,8 @@ async function loadVerifications() {
             `;
             tbody.innerHTML += row;
         });
-        attachVerificationEvents();
+
+        // attachVerificationEvents();
         // Attach event handlers
         document.querySelectorAll('.update-pin').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -787,7 +788,9 @@ async function loadUserDraws() {
       `;
             tbody.innerHTML += row;
         });
-        attachUserDrawEvents();
+
+        // attachUserDrawEvents();
+
         // Attach event handlers
         document.querySelectorAll('.status-select').forEach(select => {
             select.addEventListener('change', (e) => {
@@ -1006,7 +1009,9 @@ async function loadAllPayments() {
       `;
             tbody.innerHTML += row;
         });
-        attachPaymentEvents();
+
+        // attachPaymentEvents();
+
         // Attach event handlers
         document.querySelectorAll('.payment-status-select').forEach(select => {
             select.addEventListener('change', async (e) => {
